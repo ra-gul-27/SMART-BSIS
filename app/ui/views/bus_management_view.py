@@ -45,15 +45,22 @@ class BusManagementView(ctk.CTkFrame):
         ).pack(side="left")
 
     def _build_table(self):
-        table_card = ctk.CTkFrame(self.scroll_container, fg_color=COLORS["surface_container_lowest"], border_color=COLORS["outline_variant"], border_width=1, corner_radius=12)
+        # Table card with strong, well-defined 2px stroke
+        table_card = ctk.CTkFrame(
+            self.scroll_container, 
+            fg_color=COLORS["surface_container_lowest"], 
+            border_color="#64748b", 
+            border_width=2, 
+            corner_radius=12
+        )
         table_card.grid(row=1, column=0, sticky="nsew", padx=32, pady=16)
         table_card.grid_columnconfigure(0, weight=1)
 
         # Table Header
-        thead = ctk.CTkFrame(table_card, fg_color=COLORS["surface_container_low"], corner_radius=12) # using corner radius, but need square bottom
-        thead.pack(fill="x", padx=1, pady=(1, 0))
+        thead = ctk.CTkFrame(table_card, fg_color="#dbe8f8", corner_radius=10)
+        thead.pack(fill="x", padx=2, pady=(2, 0))
         # Mask bottom corners
-        thead_mask = ctk.CTkFrame(thead, fg_color=COLORS["surface_container_low"], height=8, corner_radius=0)
+        thead_mask = ctk.CTkFrame(thead, fg_color="#dbe8f8", height=8, corner_radius=0)
         thead_mask.pack(side="bottom", fill="x")
 
         th_row = ctk.CTkFrame(thead, fg_color="transparent")
@@ -61,54 +68,56 @@ class BusManagementView(ctk.CTkFrame):
 
         self.cols = [
             ("Bus Reg No", 2), ("Type", 1.5), ("Capacity", 1), 
-            ("Driver Name", 2), ("Status", 1.2), ("Maintenance", 1.5), ("Actions", 1)
+            ("Driver Name", 2), ("Status", 1.3), ("Maintenance", 1.5), ("Actions", 1.2)
         ]
         
         for i, (c, w) in enumerate(self.cols):
             th_row.grid_columnconfigure(i, weight=int(w*10), uniform="col")
             anchor = "w" if i < len(self.cols) - 1 else "e"
-            th = ctk.CTkLabel(th_row, text=c, font=FONTS["label_md"], text_color=COLORS["on_surface_variant"])
-            # Use sticky to align based on anchor
+            th = ctk.CTkLabel(th_row, text=c, font=("Inter", 12, "bold"), text_color="#0f172a")
             sticky = "w" if anchor == "w" else "e"
             th.grid(row=0, column=i, sticky=sticky, padx=8)
+
+        # Strong dividing stroke under the header
+        header_divider = ctk.CTkFrame(table_card, fg_color="#64748b", height=2)
+        header_divider.pack(fill="x", padx=2)
 
         # Table Body Container
         self.grid_container = ctk.CTkFrame(table_card, fg_color="transparent")
         self.grid_container.pack(fill="x")
         self.table_card = table_card
 
-        # 5. Populate Data from DB
+        # Populate Data from DB
         self._populate_grid()
 
-        # Pagination Footer
-        border_footer = ctk.CTkFrame(table_card, fg_color=COLORS["outline_variant"], height=1)
-        border_footer.pack(fill="x", padx=1)
+        # Strong dividing stroke above the footer
+        border_footer = ctk.CTkFrame(table_card, fg_color="#64748b", height=2)
+        border_footer.pack(fill="x", padx=2)
         
-        tfoot = ctk.CTkFrame(table_card, fg_color=COLORS["surface_container_lowest"], corner_radius=12)
-        tfoot.pack(fill="x", padx=1, pady=(0, 1))
-        tfoot_mask = ctk.CTkFrame(tfoot, fg_color=COLORS["surface_container_lowest"], height=8, corner_radius=0)
+        tfoot = ctk.CTkFrame(table_card, fg_color="#f8fafc", corner_radius=10)
+        tfoot.pack(fill="x", padx=2, pady=(0, 2))
+        tfoot_mask = ctk.CTkFrame(tfoot, fg_color="#f8fafc", height=8, corner_radius=0)
         tfoot_mask.pack(side="top", fill="x")
 
         tfoot_content = ctk.CTkFrame(tfoot, fg_color="transparent")
-        tfoot_content.pack(fill="x", padx=16, pady=(4, 12))
+        tfoot_content.pack(fill="x", padx=16, pady=(6, 12))
 
-        ctk.CTkLabel(tfoot_content, text="Showing 1 to 10 of 45 entries", font=("Inter", 12), text_color=COLORS["on_surface_variant"]).pack(side="left")
+        self.footer_count_lbl = ctk.CTkLabel(tfoot_content, text="Showing entries", font=("Inter", 12), text_color="#475569")
+        self.footer_count_lbl.pack(side="left")
         
         pag_wrapper = ctk.CTkFrame(tfoot_content, fg_color="transparent")
         pag_wrapper.pack(side="right")
         
         for p in ["Prev", "1", "2", "3", "Next"]:
             is_active = (p == "1")
-            fg = COLORS["primary"] if is_active else "transparent"
-            tc = COLORS["on_primary"] if is_active else COLORS["on_surface_variant"]
+            fg = COLORS["primary"] if is_active else "#ffffff"
+            tc = "#ffffff" if is_active else "#334155"
             border = 0 if is_active else 1
             ctk.CTkButton(
                 pag_wrapper, text=p, width=32, height=28, font=("Inter", 12), 
-                fg_color=fg, text_color=tc, border_color=COLORS["outline_variant"], border_width=border,
+                fg_color=fg, text_color=tc, border_color="#cbd5e1", border_width=border,
                 hover_color=COLORS["surface_container"]
             ).pack(side="left", padx=2)
-
-
 
     def _populate_grid(self):
         # Clear existing rows
@@ -116,21 +125,22 @@ class BusManagementView(ctk.CTkFrame):
             widget.destroy()
             
         buses = BusModel.get_all_buses()
+        if hasattr(self, "footer_count_lbl"):
+            self.footer_count_lbl.configure(text=f"Showing 1 to {len(buses)} of {len(buses)} entries")
         
         for i, row in enumerate(buses):
-            tr = ctk.CTkFrame(self.grid_container, fg_color=row.get("bg", "transparent"), corner_radius=0)
-            tr.pack(fill="x", padx=1)
-            if i < len(buses) - 1:
-                border = ctk.CTkFrame(self.grid_container, fg_color=COLORS["outline_variant"], height=1)
-                border.pack(fill="x", padx=1)
+            # Alternating clean row background (zebra striping)
+            row_bg = "#ffffff" if i % 2 == 0 else "#f8fbfe"
+            tr = ctk.CTkFrame(self.grid_container, fg_color=row_bg, corner_radius=0)
+            tr.pack(fill="x", padx=2)
 
             tr_content = ctk.CTkFrame(tr, fg_color="transparent")
-            tr_content.pack(fill="x", padx=16, pady=12)
+            tr_content.pack(fill="x", padx=16, pady=10)
             
             for j, (c, w) in enumerate(self.cols):
                 tr_content.grid_columnconfigure(j, weight=int(w*10), uniform="col")
 
-            # Col 1: Bus Reg
+            # Col 1: Bus Reg No
             c1 = ctk.CTkFrame(tr_content, fg_color="transparent")
             c1.grid(row=0, column=0, sticky="ew", padx=8)
             ctk.CTkLabel(c1, text=row["reg"], font=("Inter", 14, "bold"), text_color=COLORS["primary"]).pack(anchor="w")
@@ -138,44 +148,68 @@ class BusManagementView(ctk.CTkFrame):
             # Col 2: Type
             c2 = ctk.CTkFrame(tr_content, fg_color="transparent")
             c2.grid(row=0, column=1, sticky="ew", padx=8)
-            ctk.CTkLabel(c2, text=row["type"], font=FONTS["body_md"], text_color=COLORS["on_surface"]).pack(anchor="w")
+            ctk.CTkLabel(c2, text=row["type"], font=FONTS["body_md"], text_color="#0f172a").pack(anchor="w")
 
             # Col 3: Capacity
             c3 = ctk.CTkFrame(tr_content, fg_color="transparent")
             c3.grid(row=0, column=2, sticky="ew", padx=8)
-            ctk.CTkLabel(c3, text=row["capacity"], font=("Inter", 12), text_color=COLORS["on_surface_variant"]).pack(anchor="w")
+            ctk.CTkLabel(c3, text=f"{row['capacity']} seats", font=("Inter", 12), text_color="#475569").pack(anchor="w")
 
-            # Col 4: Driver
+            # Col 4: Driver Name
             c4 = ctk.CTkFrame(tr_content, fg_color="transparent")
             c4.grid(row=0, column=3, sticky="ew", padx=8)
-            ctk.CTkLabel(c4, text=row["driver"] if row["driver"] else "-", font=("Inter", 12), text_color=COLORS["on_surface"]).pack(anchor="w")
+            ctk.CTkLabel(c4, text=row["driver"] if row["driver"] else "-", font=("Inter", 13), text_color="#0f172a").pack(anchor="w")
 
-            # Col 5: Status
+            # Col 5: Status Badge
             c5 = ctk.CTkFrame(tr_content, fg_color="transparent")
             c5.grid(row=0, column=4, sticky="ew", padx=8)
             is_active = (row["status"].lower() == "active")
-            s_bg = COLORS["surface_container"] if is_active else COLORS["surface_variant"]
-            s_fg = COLORS["primary"] if is_active else COLORS["on_surface_variant"]
-            s_dot = "#0058be" if is_active else COLORS["outline"]
+            s_bg = "#dcfce7" if is_active else "#fef3c7"
+            s_fg = "#15803d" if is_active else "#b45309"
+            s_border = "#86efac" if is_active else "#fde68a"
+            s_dot = "#16a34a" if is_active else "#d97706"
             
-            s_badge = ctk.CTkFrame(c5, fg_color=s_bg, corner_radius=12)
+            s_badge = ctk.CTkFrame(c5, fg_color=s_bg, border_color=s_border, border_width=1, corner_radius=12)
             s_badge.pack(anchor="w")
-            ctk.CTkLabel(s_badge, text="●", text_color=s_dot, font=("Arial", 12)).pack(side="left", padx=(8, 4), pady=4)
-            ctk.CTkLabel(s_badge, text=row["status"].upper(), text_color=s_fg, font=("Inter", 11, "bold")).pack(side="left", padx=(0, 8))
+            ctk.CTkLabel(s_badge, text="●", text_color=s_dot, font=("Arial", 10)).pack(side="left", padx=(8, 4), pady=3)
+            ctk.CTkLabel(s_badge, text=row["status"].upper(), text_color=s_fg, font=("Inter", 11, "bold")).pack(side="left", padx=(0, 10), pady=3)
 
             # Col 6: Last Maintenance
             c6 = ctk.CTkFrame(tr_content, fg_color="transparent")
             c6.grid(row=0, column=5, sticky="ew", padx=8)
-            ctk.CTkLabel(c6, text=row["last_maintenance"], font=("Inter", 11), text_color=COLORS["on_surface_variant"]).pack(anchor="w")
+            ctk.CTkLabel(c6, text=row["last_maintenance"], font=("Inter", 12), text_color="#475569").pack(anchor="w")
 
-            # Col 7: Actions
+            # Col 7: Actions Buttons (Well-defined micro buttons)
             c7 = ctk.CTkFrame(tr_content, fg_color="transparent")
             c7.grid(row=0, column=6, sticky="ew", padx=8)
             c7_wrapper = ctk.CTkFrame(c7, fg_color="transparent")
             c7_wrapper.pack(anchor="e")
-            ctk.CTkButton(c7_wrapper, text="👁", width=28, height=28, fg_color="transparent", text_color=COLORS["on_surface_variant"], hover_color=COLORS["surface_container"]).pack(side="left", padx=2)
-            ctk.CTkButton(c7_wrapper, text="✎", width=28, height=28, fg_color="transparent", text_color=COLORS["on_surface_variant"], hover_color=COLORS["surface_container"]).pack(side="left", padx=2)
-            ctk.CTkButton(c7_wrapper, text="⏻", width=28, height=28, fg_color="transparent", text_color=COLORS["on_surface_variant"], hover_color=COLORS["error_container"]).pack(side="left", padx=2)
+
+            # View Icon Button
+            ctk.CTkButton(
+                c7_wrapper, text="👁", width=30, height=30, 
+                fg_color="#e0eaf7", hover_color="#cbdff7", 
+                text_color="#0058be", corner_radius=6
+            ).pack(side="left", padx=2)
+
+            # Edit Icon Button
+            ctk.CTkButton(
+                c7_wrapper, text="✎", width=30, height=30, 
+                fg_color="#e0f2fe", hover_color="#bae6fd", 
+                text_color="#0284c7", corner_radius=6
+            ).pack(side="left", padx=2)
+
+            # Power/Status Toggle Button
+            ctk.CTkButton(
+                c7_wrapper, text="⏻", width=30, height=30, 
+                fg_color="#fee2e2", hover_color="#fca5a5", 
+                text_color="#dc2626", corner_radius=6
+            ).pack(side="left", padx=2)
+
+            # Horizontal divider line under every row (except last)
+            if i < len(buses) - 1:
+                divider = ctk.CTkFrame(self.grid_container, fg_color="#cbd5e1", height=1)
+                divider.pack(fill="x", padx=2)
 
     def _build_drawer(self):
         # The drawer sits exactly on top of the right side.

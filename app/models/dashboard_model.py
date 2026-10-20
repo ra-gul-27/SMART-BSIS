@@ -28,8 +28,16 @@ class DashboardModel:
         cursor.execute("SELECT COUNT(*) FROM events WHERE event_type = 'error'")
         active_alerts = cursor.fetchone()[0]
         
-        # Live Detected (Mocked dynamically for now)
-        live_detected = 48
+        # Live Detected: Query distinct buses recognized by YOLO/ANPR in detections
+        cursor.execute("SELECT COUNT(DISTINCT bus_registration) FROM detections")
+        det_count = cursor.fetchone()[0]
+        if det_count > 0:
+            live_detected = det_count
+        else:
+            # If no detections logged yet, query total ANPR matches
+            cursor.execute("SELECT COUNT(*) FROM anpr_records")
+            anpr_count = cursor.fetchone()[0]
+            live_detected = anpr_count if anpr_count > 0 else 0
         
         conn.close()
         
@@ -64,8 +72,10 @@ class DashboardModel:
         cursor.execute("SELECT timestamp, title, description, event_type FROM events ORDER BY timestamp DESC LIMIT %s", (limit,))
         events = []
         for row in cursor.fetchall():
-            # Format time for UI: just HH:MM:SS
-            time_str = str(row[0]).split(" ")[1] if " " in str(row[0]) else str(row[0])
+            # Format time for UI: clean HH:MM:SS without microseconds
+            raw_time = str(row[0])
+            time_part = raw_time.split(" ")[1] if " " in raw_time else raw_time
+            time_str = time_part.split(".")[0]
             is_alert = row[3] == "error"
             # Map color based on type
             color = "#ef4444" if is_alert else ("#3b82f6" if row[3] == "primary" else "#10b981")

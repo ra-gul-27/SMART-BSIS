@@ -1,6 +1,88 @@
+import tkinter as tk
+import tkinter.font as tkfont
 import customtkinter as ctk
 from app.constants import COLORS, FONTS
 from app.models.dashboard_model import DashboardModel
+
+class BusTicker(ctk.CTkFrame):
+    """
+    Electronic LED Bus destination/name board ticker for Event Stream details.
+    Continuous seamless horizontal scrolling with auto-pause on mouse hover.
+    """
+    def __init__(self, master, text, font=None, text_color="#334155", bg_color="transparent", speed=1, **kwargs):
+        super().__init__(master, fg_color=bg_color, height=22, **kwargs)
+        self.pack_propagate(False)
+        self.grid_propagate(False)
+
+        self.raw_text = text
+        self.font = font or FONTS["body_md"]
+        self.text_color = text_color
+        self.speed = speed
+        self._timer = None
+        self._paused = False
+
+        if isinstance(self.font, tuple):
+            self.tk_font = tkfont.Font(family=self.font[0], size=self.font[1], weight=self.font[2] if len(self.font) > 2 else "normal")
+        else:
+            self.tk_font = tkfont.nametofont("TkDefaultFont")
+
+        self.separator = "     •     "
+        self.display_text = f"{self.raw_text}{self.separator}"
+        self.text_width = max(self.tk_font.measure(self.display_text), 80)
+
+        canvas_bg = bg_color if bg_color != "transparent" else "#ffffff"
+        self.canvas = tk.Canvas(
+            self,
+            bg=canvas_bg,
+            highlightthickness=0,
+            bd=0,
+            height=20
+        )
+        self.canvas.pack(fill="both", expand=True)
+
+        self.x1 = 0
+        self.x2 = self.text_width
+        self.item1 = self.canvas.create_text(self.x1, 10, text=self.display_text, anchor="w", font=self.tk_font, fill=self.text_color)
+        self.item2 = self.canvas.create_text(self.x2, 10, text=self.display_text, anchor="w", font=self.tk_font, fill=self.text_color)
+
+        self.canvas.bind("<Enter>", lambda e: self.pause())
+        self.canvas.bind("<Leave>", lambda e: self.resume())
+
+        self._animate()
+
+    def pause(self):
+        self._paused = True
+
+    def resume(self):
+        self._paused = False
+
+    def _animate(self):
+        if not self.winfo_exists():
+            return
+        try:
+            if not self._paused:
+                self.x1 -= self.speed
+                self.x2 -= self.speed
+
+                if self.x1 <= -self.text_width:
+                    self.x1 = self.x2 + self.text_width
+                if self.x2 <= -self.text_width:
+                    self.x2 = self.x1 + self.text_width
+
+                self.canvas.coords(self.item1, self.x1, 10)
+                self.canvas.coords(self.item2, self.x2, 10)
+
+            self._timer = self.after(35, self._animate)
+        except Exception:
+            pass
+
+    def destroy(self):
+        if hasattr(self, "_timer") and self._timer:
+            try:
+                self.after_cancel(self._timer)
+            except Exception:
+                pass
+        super().destroy()
 
 def add_hover_effect(widget, hover_color, default_color, hover_width=2, default_width=1):
     def on_enter(e):
@@ -26,8 +108,8 @@ def add_hover_effect(widget, hover_color, default_color, hover_width=2, default_
 class KPIWidget(ctk.CTkFrame):
     def __init__(self, master, title, value, icon, subtitle=None, is_alert=False, sub_bg=False, **kwargs):
         bg_color = COLORS["error_container"] if is_alert else COLORS["surface_container_lowest"]
-        border_color = COLORS["error"] if is_alert else COLORS["outline_variant"]
-        super().__init__(master, fg_color=bg_color, border_color=border_color, border_width=1, corner_radius=12, **kwargs)
+        border_color = COLORS["error"] if is_alert else COLORS["primary"]
+        super().__init__(master, fg_color=bg_color, border_color=border_color, border_width=2, corner_radius=12, **kwargs)
         
         self.pack_propagate(False)
 
@@ -69,10 +151,6 @@ class KPIWidget(ctk.CTkFrame):
                     val_frame, text=subtitle, font=("Inter", 11), text_color=COLORS["primary"] if not is_alert else COLORS["error"]
                 )
                 sub_lbl.pack(side="left", anchor="sw", padx=8, pady=6)
-
-        # Apply hover effect
-        hover_col = "#ff4d4d" if is_alert else COLORS["primary"]
-        add_hover_effect(self, hover_color=hover_col, default_color=border_color)
 
     def update_value(self, new_value):
         self.val_lbl.configure(text=str(new_value))
@@ -284,7 +362,12 @@ class DashboardView(ctk.CTkScrollableFrame):
             text_frame.pack(side="left", fill="x", expand=True, padx=8)
             
             ctk.CTkLabel(text_frame, text=title, font=FONTS["label_md"], text_color=color).pack(anchor="w")
-            ctk.CTkLabel(text_frame, text=desc, font=FONTS["body_md"], text_color=COLORS["on_surface_variant"]).pack(anchor="w")
+            
+            # Electronic LED Bus Name Board marquee scrolling ticker for details alone
+            ticker_bg = COLORS["error_container"] if is_alert else COLORS["surface"]
+            ticker_fg = COLORS["error"] if is_alert else COLORS["on_surface_variant"]
+            ticker = BusTicker(text_frame, text=desc, font=FONTS["body_md"], text_color=ticker_fg, bg_color=ticker_bg, speed=1)
+            ticker.pack(fill="x", expand=True, pady=(2, 0))
             
             if not is_alert and time != events[-1][0]:
                 line = ctk.CTkFrame(self.e_list, fg_color=COLORS["outline_variant"], height=1)

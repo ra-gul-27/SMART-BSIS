@@ -47,11 +47,22 @@ class SmartBusStandApp(ctk.CTk):
 
         # Views Dictionary
         self.views = {}
+        self.current_view_name = "Dashboard"
+
+        # Keyboard shortcuts for instant refresh during development
+        self.bind("<Control-r>", lambda e: self.reload_current_view())
+        self.bind("<Control-R>", lambda e: self.reload_current_view())
+        self.bind("<F5>", lambda e: self.reload_current_view())
 
         # 4. Content View (Dashboard initially)
         self.show_view("Dashboard")
 
+    def reload_current_view(self):
+        view = getattr(self, "current_view_name", "Dashboard")
+        self.show_view(view)
+
     def show_view(self, view_name):
+        self.current_view_name = view_name
         if hasattr(self, "current_view") and self.current_view is not None:
             self.current_view.destroy()
             

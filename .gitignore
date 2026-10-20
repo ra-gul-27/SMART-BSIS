@@ -42,6 +42,11 @@ venv.bak/
 *.swp
 *.swo
 
+# Model Weights
+*.pt
+*.pth
+*.onnx
+
 # OS files
 Thumbs.db
 Desktop.ini

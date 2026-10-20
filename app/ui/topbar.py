@@ -32,6 +32,21 @@ class Topbar(ctk.CTkFrame):
         self.right_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
         self.right_frame.pack(side="right", pady=14)
 
+        # Refresh / Reload button
+        self.reload_btn = ctk.CTkButton(
+            self.right_frame,
+            text="🔄", 
+            width=36,
+            height=36,
+            fg_color="transparent",
+            text_color=COLORS["outline"],
+            hover_color=COLORS["surface_container_low"],
+            corner_radius=18,
+            font=("Segoe UI Emoji", 16),
+            command=lambda: self.app_controller.reload_current_view() if self.app_controller else None
+        )
+        self.reload_btn.pack(side="left", padx=(0, 4))
+
         self.notif_btn = ctk.CTkButton(
             self.right_frame,
             text="🔔", 
@@ -44,7 +59,7 @@ class Topbar(ctk.CTkFrame):
             font=("Segoe UI Emoji", 20),
             command=lambda: self.app_controller.show_view("AlertsNotifications") if self.app_controller else None
         )
-        self.notif_btn.pack(side="left", padx=16)
+        self.notif_btn.pack(side="left", padx=12)
 
         # Profile area
         self.profile_frame = ctk.CTkFrame(

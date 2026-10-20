@@ -49,7 +49,19 @@ def init_db():
             id SERIAL PRIMARY KEY,
             bay_id VARCHAR UNIQUE NOT NULL,
             status VARCHAR NOT NULL,
-            vehicle_reg VARCHAR
+            vehicle_reg VARCHAR,
+            polygon_points VARCHAR
+        )
+        ''')
+
+        # Create Detections Table
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS detections (
+            id SERIAL PRIMARY KEY,
+            bus_registration VARCHAR NOT NULL,
+            bay_id VARCHAR NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            confidence REAL NOT NULL
         )
         ''')
 
