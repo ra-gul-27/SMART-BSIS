@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Bus Management - Smart Bus Stand</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#fefcff",
+                        "secondary-fixed-dim": "#c0c7cf",
+                        "outline": "#727785",
+                        "tertiary-container": "#b75b00",
+                        "inverse-primary": "#adc6ff",
+                        "secondary-container": "#dce3eb",
+                        "on-primary-fixed-variant": "#004395",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "on-background": "#0b1c30",
+                        "on-tertiary-fixed": "#311400",
+                        "background": "#f8f9ff",
+                        "surface": "#f8f9ff",
+                        "surface-container-low": "#eff4ff",
+                        "on-surface": "#0b1c30",
+                        "on-secondary-fixed-variant": "#40484e",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#d3e4fe",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#d8e2ff",
+                        "surface-bright": "#f8f9ff",
+                        "on-primary-fixed": "#001a42",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "primary-container": "#2170e4",
+                        "primary": "#0058be",
+                        "surface-container-highest": "#d3e4fe",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-secondary-fixed": "#151c22",
+                        "surface-container-high": "#dce9ff",
+                        "outline-variant": "#c2c6d6",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-secondary-container": "#5e656c",
+                        "inverse-surface": "#213145",
+                        "tertiary": "#924700",
+                        "secondary-fixed": "#dce3eb",
+                        "surface-container": "#e5eeff",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#424754",
+                        "secondary": "#585f66",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "surface-tint": "#005ac2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "xl": "32px",
+                        "container-margin": "24px",
+                        "base": "8px",
+                        "md": "16px",
+                        "sm": "8px",
+                        "xs": "4px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "data-mono": ["Inter"],
+                        "display": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "data-mono": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        body {
+            background-color: #f8f9ff;
+        }
+
+        /* Ambient shadows */
+        .shadow-level-1 {
+            box-shadow: 0px 4px 12px rgba(0, 88, 190, 0.05);
+        }
+
+        .shadow-level-2 {
+            box-shadow: 0px 4px 12px rgba(0, 88, 190, 0.08);
+        }
+
+        .shadow-level-3 {
+            box-shadow: 0px 12px 24px rgba(0, 88, 190, 0.12);
+        }
+
+        /* Table row hover */
+        tbody tr:hover {
+            background-color: rgba(0, 88, 190, 0.03);
+            transition: background-color 0.2s;
+        }
+    </style>
+</head>
+
+<body class="text-on-background bg-background min-h-screen flex overflow-hidden">
+    <!-- SideNavBar -->
+    <nav
+        class="hidden md:flex flex-col p-md fixed left-0 top-0 h-screen w-[280px] bg-surface-bright border-r border-outline-variant z-20">
+        <div class="flex items-center gap-sm mb-lg px-sm">
+            <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary">directions_bus</span>
+            </div>
+            <div>
+                <h1 class="font-headline-md text-headline-md font-bold text-primary">Smart Bus Stand</h1>
+                <p class="font-label-md text-label-md text-on-surface-variant">Management Portal</p>
+            </div>
+        </div>
+        <div class="flex-1 overflow-y-auto space-y-1"><a
+                class="flex items-center gap-md px-md py-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined">dashboard</span> Dashboard
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined">videocam</span> Live Monitoring
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded-lg font-body-md text-body-md text-primary font-bold bg-secondary-container transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined">directions_bus</span> Bus Management
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined">route</span> Route Management
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined">schedule</span> Schedule &amp; Timings
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined">local_parking</span> Parking Bay Management
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined">linked_camera</span> ANPR Records
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined">notifications_active</span> Alerts &amp; Notifications
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined">analytics</span> Reports &amp; Analytics
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined">health_and_safety</span> System Health
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined">history</span> Activity Logs
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined">settings_backup_restore</span> Backup &amp; Restore
+            </a>
+            <a class="flex items-center gap-md px-md py-sm rounded-lg font-body-md text-body-md text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined">settings</span> Settings
+            </a>
+        </div>
+    </nav>
+    <!-- Main Content Area -->
+    <div class="flex-1 md:ml-[280px] flex flex-col h-screen overflow-hidden bg-background">
+        <!-- TopNavBar -->
+        <header
+            class="flex items-center justify-between px-lg h-16 bg-surface-container-lowest border-b border-outline-variant z-10 shrink-0">
+            <div class="flex items-center">
+                <h2 class="font-headline-md text-headline-md font-bold text-on-surface hidden md:block">Smart Bus Stand
+                </h2>
+            </div>
+            <div class="flex items-center gap-md">
+                <div class="relative hidden sm:block">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+                    <input
+                        class="pl-10 pr-4 py-2 bg-surface-container rounded-lg border-none text-body-md font-body-md text-on-surface focus:ring-2 focus:ring-primary w-64 transition-all placeholder:text-outline-variant"
+                        placeholder="Search buses, routes..." type="text">
+                </div>
+                <button
+                    class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <div class="flex items-center gap-sm pl-sm border-l border-outline-variant">
+                    <div
+                        class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-label-md font-bold">
+                        AD
+                    </div>
+                    <span class="font-label-md text-label-md text-on-surface-variant hidden sm:block">Admin</span>
+                </div>
+            </div>
+        </header>
+        <!-- Main Scrollable Content -->
+        <main class="flex-1 overflow-y-auto p-lg relative z-0">
+            <!-- Page Header -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-lg">
+                <div>
+                    <h1 class="font-headline-lg text-headline-lg text-on-surface">Bus Management</h1>
+                    <p class="font-body-md text-body-md text-on-surface-variant mt-1">Manage fleet, monitor status, and
+                        assign routes.</p>
+                </div>
+                <div class="flex gap-md">
+                    <button
+                        class="flex items-center gap-2 px-md py-2 bg-surface-container border border-outline-variant text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">filter_list</span> Filter
+                    </button>
+                    <button
+                        class="flex items-center gap-2 px-md py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary/90 transition-colors shadow-level-1 hover:shadow-level-2"
+                        onclick="document.getElementById('addBusModal').classList.remove('hidden')">
+                        <span class="material-symbols-outlined text-[18px]">add</span> Add New Bus
+                    </button>
+                </div>
+            </div>
+            <!-- Data Table Card -->
+            <div
+                class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden shadow-level-1">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr
+                                class="border-b border-outline-variant bg-surface-container-low font-label-md text-label-md text-on-surface-variant">
+                                <th class="py-3 px-4 font-semibold">Bus ID / Reg No</th>
+                                <th class="py-3 px-4 font-semibold">Operator</th>
+                                <th class="py-3 px-4 font-semibold">Route</th>
+                                <th class="py-3 px-4 font-semibold">Assigned Bay</th>
+                                <th class="py-3 px-4 font-semibold">Status</th>
+                                <th class="py-3 px-4 font-semibold">Last Detected</th>
+                                <th class="py-3 px-4 font-semibold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="font-body-md text-body-md text-on-surface">
+                            <tr class="border-b border-outline-variant/50">
+                                <td class="py-3 px-4">
+                                    <div class="font-data-mono text-data-mono font-semibold text-primary">BUS-001</div>
+                                    <div class="text-xs text-on-surface-variant mt-0.5">TN 01 AN 2345</div>
+                                </td>
+                                <td class="py-3 px-4">State Transport</td>
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center gap-1">
+                                        <span
+                                            class="bg-surface-variant text-on-surface px-1.5 py-0.5 rounded text-xs font-semibold">R04</span>
+                                        <span class="text-on-surface-variant text-xs truncate max-w-[120px]">Central ➝
+                                            North</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4"><span class="font-data-mono">B12</span></td>
+                                <td class="py-3 px-4">
+                                    <span
+                                        class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-primary"></span> ACTIVE
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-on-surface-variant">10:32 AM</td>
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <button
+                                            class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors"
+                                            title="View">
+                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                        </button>
+                                        <button
+                                            class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors"
+                                            title="Edit">
+                                            <span class="material-symbols-outlined text-[18px]">edit</span>
+                                        </button>
+                                        <button
+                                            class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-error-container hover:text-error transition-colors"
+                                            title="Deactivate">
+                                            <span
+                                                class="material-symbols-outlined text-[18px]">power_settings_new</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-outline-variant/50 bg-surface-container-lowest">
+                                <td class="py-3 px-4">
+                                    <div class="font-data-mono text-data-mono font-semibold text-primary">BUS-042</div>
+                                    <div class="text-xs text-on-surface-variant mt-0.5">TN 02 XZ 9921</div>
+                                </td>
+                                <td class="py-3 px-4">City Transit Co.</td>
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center gap-1">
+                                        <span
+                                            class="bg-surface-variant text-on-surface px-1.5 py-0.5 rounded text-xs font-semibold">R12</span>
+                                        <span class="text-on-surface-variant text-xs truncate max-w-[120px]">South ➝
+                                            East Hub</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4"><span class="font-data-mono">B04</span></td>
+                                <td class="py-3 px-4">
+                                    <span
+                                        class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-primary"></span> ACTIVE
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-on-surface-variant">10:45 AM</td>
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <button
+                                            class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                        </button>
+                                        <button
+                                            class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                                            <span class="material-symbols-outlined text-[18px]">edit</span>
+                                        </button>
+                                        <button
+                                            class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-error-container hover:text-error transition-colors">
+                                            <span
+                                                class="material-symbols-outlined text-[18px]">power_settings_new</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-outline-variant/50">
+                                <td class="py-3 px-4">
+                                    <div class="font-data-mono text-data-mono font-semibold text-primary">BUS-108</div>
+                                    <div class="text-xs text-on-surface-variant mt-0.5">TN 05 PQ 1100</div>
+                                </td>
+                                <td class="py-3 px-4">State Transport</td>
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center gap-1">
+                                        <span
+                                            class="bg-surface-variant text-on-surface px-1.5 py-0.5 rounded text-xs font-semibold">R09</span>
+                                        <span class="text-on-surface-variant text-xs truncate max-w-[120px]">Airport
+                                            Exp.</span>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-4"><span class="font-data-mono text-on-surface-variant">--</span>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span
+                                        class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-outline-variant/30 text-on-surface-variant text-xs font-semibold">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-outline"></span> MAINTENANCE
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-on-surface-variant">Yesterday</td>
+                                <td class="py-3 px-4">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <button
+                                            class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                        </button>
+                                        <button
+                                            class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                                            <span class="material-symbols-outlined text-[18px]">edit</span>
+                                        </button>
+                                        <button
+                                            class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-error-container hover:text-error transition-colors">
+                                            <span
+                                                class="material-symbols-outlined text-[18px]">power_settings_new</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination -->
+                <div
+                    class="px-4 py-3 border-t border-outline-variant bg-surface-container-lowest flex items-center justify-between">
+                    <span class="font-body-md text-sm text-on-surface-variant">Showing 1 to 10 of 45 entries</span>
+                    <div class="flex items-center gap-1">
+                        <button
+                            class="px-3 py-1 rounded border border-outline-variant text-on-surface-variant hover:bg-surface-container text-sm disabled:opacity-50"
+                            disabled="">Prev</button>
+                        <button class="px-3 py-1 rounded bg-primary text-on-primary text-sm">1</button>
+                        <button
+                            class="px-3 py-1 rounded border border-outline-variant text-on-surface hover:bg-surface-container text-sm">2</button>
+                        <button
+                            class="px-3 py-1 rounded border border-outline-variant text-on-surface hover:bg-surface-container text-sm">3</button>
+                        <button
+                            class="px-3 py-1 rounded border border-outline-variant text-on-surface-variant hover:bg-surface-container text-sm">Next</button>
+                    </div>
+                </div>
+            </div>
+            <div class="h-16"></div> <!-- Spacer for footer -->
+        </main>
+        <!-- Footer -->
+        <footer
+            class="flex items-center justify-between px-md w-full h-8 bg-surface-container-low border-t border-outline-variant fixed bottom-0 right-0 md:w-[calc(100%-280px)] z-10 shrink-0">
+            <span class="font-label-md text-label-md text-on-surface-variant">System Uptime: 99.9% | AI Engine: YOLOv11
+                Active | DB: Connected</span>
+            <div class="flex gap-4">
+                <a class="font-label-md text-label-md text-on-surface-variant hover:underline opacity-90"
+                    href="#">Status</a>
+                <a class="font-label-md text-label-md text-on-surface-variant hover:underline opacity-90" href="#">Help
+                    Desk</a>
+                <a class="font-label-md text-label-md text-on-surface-variant hover:underline opacity-90"
+                    href="#">Security</a>
+            </div>
+        </footer>
+    </div>
+    <!-- Add Bus Modal Drawer (Right Side) -->
+    <div class="fixed inset-0 z-50 hidden" id="addBusModal">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-on-background/20 backdrop-blur-sm transition-opacity"
+            onclick="document.getElementById('addBusModal').classList.add('hidden')"></div>
+        <!-- Drawer Panel -->
+        <div
+            class="absolute right-0 top-0 h-full w-full max-w-md bg-surface-container-lowest shadow-level-3 border-l border-outline-variant flex flex-col transform transition-transform duration-300">
+            <div class="px-lg py-4 border-b border-outline-variant flex items-center justify-between bg-surface-bright">
+                <h3 class="font-headline-md text-headline-md text-on-surface">Add New Bus</h3>
+                <button
+                    class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container"
+                    onclick="document.getElementById('addBusModal').classList.add('hidden')">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-lg">
+                <form class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-label-md text-label-md text-on-surface mb-1">Registration Number
+                                *</label>
+                            <input
+                                class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                                placeholder="e.g., TN 01 AN 2345" type="text">
+                        </div>
+                        <div>
+                            <label class="block font-label-md text-label-md text-on-surface mb-1">Bus ID (Internal)
+                                *</label>
+                            <input
+                                class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                                placeholder="e.g., BUS-001" type="text">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-1">Operator / Fleet</label>
+                        <select
+                            class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none appearance-none">
+                            <option>State Transport Corporation</option>
+                            <option>City Transit Co.</option>
+                            <option>Private Operators</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block font-label-md text-label-md text-on-surface mb-1">Bus Type</label>
+                            <select
+                                class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none appearance-none">
+                                <option>Standard City Bus</option>
+                                <option>Low-Floor AC</option>
+                                <option>Electric (EV)</option>
+                                <option>Mini Bus</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-label-md text-label-md text-on-surface mb-1">Initial Status</label>
+                            <select
+                                class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none appearance-none">
+                                <option>Active (In Service)</option>
+                                <option>Standby</option>
+                                <option>Maintenance</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="border-t border-outline-variant pt-4 mt-2">
+                        <h4 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-3">
+                            Route Assignment</h4>
+                        <div class="mb-4">
+                            <label class="block font-label-md text-label-md text-on-surface mb-1">Select Route</label>
+                            <select
+                                class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none appearance-none">
+                                <option>R04 (Central ➝ North)</option>
+                                <option>R12 (South ➝ East Hub)</option>
+                                <option>R09 (Airport Express)</option>
+                                <option>Unassigned</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block font-label-md text-label-md text-on-surface mb-1">Source</label>
+                                <input
+                                    class="w-full px-3 py-2 bg-surface-variant/30 border border-outline-variant/50 rounded-lg text-body-md text-on-surface-variant cursor-not-allowed"
+                                    disabled="" type="text" value="Central Terminal">
+                            </div>
+                            <div>
+                                <label
+                                    class="block font-label-md text-label-md text-on-surface mb-1">Destination</label>
+                                <input
+                                    class="w-full px-3 py-2 bg-surface-variant/30 border border-outline-variant/50 rounded-lg text-body-md text-on-surface-variant cursor-not-allowed"
+                                    disabled="" type="text" value="North Hub">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block font-label-md text-label-md text-on-surface mb-1">Default
+                                    Fare</label>
+                                <div class="relative">
+                                    <span
+                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">$</span>
+                                    <input
+                                        class="w-full pl-7 pr-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                                        placeholder="0.00" type="number">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block font-label-md text-label-md text-on-surface mb-1">Assign Bay</label>
+                                <select
+                                    class="w-full px-3 py-2 bg-surface-container-lowest border border-outline-variant rounded-lg text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none appearance-none">
+                                    <option>Auto-Assign</option>
+                                    <option>B12 (Available)</option>
+                                    <option>B04 (Available)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="p-lg border-t border-outline-variant bg-surface-bright flex justify-end gap-3">
+                <button
+                    class="px-4 py-2 border border-outline-variant text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-container transition-colors"
+                    onclick="document.getElementById('addBusModal').classList.add('hidden')">
+                    Cancel
+                </button>
+                <button
+                    class="px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary/90 transition-colors shadow-level-1">
+                    Save Bus Record
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+
+</html>

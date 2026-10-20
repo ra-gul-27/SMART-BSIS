@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>ANPR Records - Smart Bus Stand</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Material Symbols -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <!-- Tailwind Config -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#fefcff",
+                        "secondary-fixed-dim": "#c0c7cf",
+                        "outline": "#727785",
+                        "tertiary-container": "#b75b00",
+                        "inverse-primary": "#adc6ff",
+                        "secondary-container": "#dce3eb",
+                        "on-primary-fixed-variant": "#004395",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "on-background": "#0b1c30",
+                        "on-tertiary-fixed": "#311400",
+                        "background": "#f8f9ff",
+                        "surface": "#f8f9ff",
+                        "surface-container-low": "#eff4ff",
+                        "on-surface": "#0b1c30",
+                        "on-secondary-fixed-variant": "#40484e",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#d3e4fe",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#d8e2ff",
+                        "surface-bright": "#f8f9ff",
+                        "on-primary-fixed": "#001a42",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "primary-container": "#2170e4",
+                        "primary": "#0058be",
+                        "surface-container-highest": "#d3e4fe",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-secondary-fixed": "#151c22",
+                        "surface-container-high": "#dce9ff",
+                        "outline-variant": "#c2c6d6",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-secondary-container": "#5e656c",
+                        "inverse-surface": "#213145",
+                        "tertiary": "#924700",
+                        "secondary-fixed": "#dce3eb",
+                        "surface-container": "#e5eeff",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#424754",
+                        "secondary": "#585f66",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "surface-tint": "#005ac2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "xl": "32px",
+                        "container-margin": "24px",
+                        "base": "8px",
+                        "md": "16px",
+                        "sm": "8px",
+                        "xs": "4px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "data-mono": ["Inter"],
+                        "display": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "data-mono": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .material-symbols-outlined[data-weight="fill"] {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body-md h-screen overflow-hidden flex">
+    <!-- SideNavBar -->
+    <aside
+        class="bg-surface-bright dark:bg-surface-dim fixed left-0 top-0 h-screen w-[280px] border-r border-outline-variant dark:border-outline flex flex-col p-md z-50">
+        <!-- Brand Header -->
+        <div class="mb-lg px-sm">
+            <h1
+                class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim tracking-tight">
+                Smart Bus Stand</h1>
+            <p class="font-label-md text-label-md text-on-surface-variant uppercase mt-1">Management Portal</p>
+        </div>
+        <!-- Navigation Tabs -->
+        <nav class="flex-1 overflow-y-auto space-y-1"><a
+                class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined text-[20px]">dashboard</span>
+                <span class="font-body-md">Dashboard</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined text-[20px]">videocam</span>
+                <span class="font-body-md">Live Monitoring</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined text-[20px]">directions_bus</span>
+                <span class="font-body-md">Bus Management</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined text-[20px]">route</span>
+                <span class="font-body-md">Route Management</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined text-[20px]">schedule</span>
+                <span class="font-body-md">Schedule &amp; Timings</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined text-[20px]">local_parking</span>
+                <span class="font-body-md">Parking Bay Management</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-primary dark:text-primary-fixed-dim font-bold bg-secondary-container dark:bg-secondary-fixed-dim transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined text-[20px]" data-weight="fill">linked_camera</span>
+                <span class="font-body-md font-semibold">ANPR Records</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined text-[20px]">notifications_active</span>
+                <span class="font-body-md">Alerts &amp; Notifications</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined text-[20px]">analytics</span>
+                <span class="font-body-md">Reports &amp; Analytics</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined text-[20px]">health_and_safety</span>
+                <span class="font-body-md">System Health</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined text-[20px]">history</span>
+                <span class="font-body-md">Activity Logs</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined text-[20px]">settings_backup_restore</span>
+                <span class="font-body-md">Backup &amp; Restore</span>
+            </a>
+            <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200"
+                href="#">
+                <span class="material-symbols-outlined text-[20px]">settings</span>
+                <span class="font-body-md">Settings</span>
+            </a>
+        </nav>
+    </aside>
+    <!-- Main Content Area -->
+    <div class="flex-1 ml-[280px] flex flex-col h-screen relative">
+        <!-- TopNavBar -->
+        <header
+            class="bg-surface-container-lowest dark:bg-surface-container-lowest fixed top-0 right-0 w-[calc(100%-280px)] h-16 border-b border-outline-variant dark:border-outline flex items-center justify-between px-lg z-40">
+            <div class="flex-1 flex items-center">
+                <div class="relative w-64">
+                    <span
+                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+                    <input
+                        class="w-full bg-surface py-2 pl-10 pr-4 rounded-lg border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 text-body-md outline-none transition-all"
+                        placeholder="Search ANPR records..." type="text">
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button
+                    class="p-2 text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors rounded-full hover:bg-surface-container">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <div class="h-8 w-px bg-outline-variant mx-2"></div>
+                <div class="flex items-center gap-3 cursor-pointer">
+                    <span class="font-body-md font-medium text-on-surface">Admin</span>
+                    <img alt="Super Administrator Avatar"
+                        class="w-8 h-8 rounded-full object-cover border border-outline-variant"
+                        data-alt="A small, professional portrait avatar of a corporate system administrator in a brightly lit modern office setting. Sharp focus, clean lighting."
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuB47hWjwNOq6qhxC9O1aE8RhZz1A3XEqj6QOkXQFeWIsqdatW24oRHhD6SkLdl_dBAEiY4evgmN_NlwQxQu06eBDaUMpi9MqCgFXVYSo-e1YoKBybvSHNyTK8kQXJ_3_nUdwTQ1TbjTjoyct1HThhDISxhuPn7i1v0zuNKFUAxG7Xg76uv26eWSdbB9wIr7PyGuR5VRGiv4aTX7DnfDZ0tVI-USRmB3S1P4nleyBgXaSsJfHZdsS5ei7A">
+                </div>
+            </div>
+        </header>
+        <!-- Canvas -->
+        <main class="flex-1 mt-16 overflow-y-auto p-lg bg-surface">
+            <!-- Page Header -->
+            <div class="mb-lg flex justify-between items-end">
+                <div>
+                    <h2 class="font-headline-lg text-headline-lg text-on-background">ANPR Records</h2>
+                    <p class="font-body-md text-on-surface-variant mt-1">Monitor and verify automatic number plate
+                        recognition events.</p>
+                </div>
+                <!-- Controls -->
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <span
+                            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">calendar_today</span>
+                        <input
+                            class="bg-surface-container-lowest border border-outline-variant text-body-md rounded-lg py-2 pl-10 pr-4 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none h-[40px]"
+                            type="date">
+                    </div>
+                    <select
+                        class="bg-surface-container-lowest border border-outline-variant text-body-md rounded-lg py-2 px-4 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none h-[40px] appearance-none pr-10">
+                        <option>All Cameras</option>
+                        <option>CAM-01 (Entry)</option>
+                        <option>CAM-02 (Exit)</option>
+                        <option>CAM-03 (Bay Area)</option>
+                    </select>
+                    <button
+                        class="bg-primary text-white font-body-md font-medium px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-surface-tint shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all h-[40px]">
+                        <span class="material-symbols-outlined text-[18px]">download</span>
+                        Export CSV
+                    </button>
+                </div>
+            </div>
+            <!-- Bento Layout -->
+            <div class="flex gap-lg h-[calc(100vh-200px)]">
+                <!-- Data Table Panel (Left) -->
+                <div
+                    class="flex-1 bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden flex flex-col shadow-[0_4px_12px_rgba(0,0,0,0.02)]">
+                    <div class="overflow-x-auto flex-1">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-surface-container-low border-b border-outline-variant sticky top-0">
+                                <tr>
+                                    <th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase">
+                                        Timestamp</th>
+                                    <th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase">
+                                        Camera</th>
+                                    <th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase">
+                                        Registration</th>
+                                    <th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase">
+                                        Match/Route</th>
+                                    <th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase">
+                                        Bay</th>
+                                    <th class="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase">
+                                        Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="font-body-md divide-y divide-outline-variant/50">
+                                <!-- Active Row -->
+                                <tr
+                                    class="bg-primary-fixed/30 hover:bg-primary-fixed/50 cursor-pointer transition-colors">
+                                    <td class="py-3 px-4 font-data-mono text-on-surface">10:42:15 AM</td>
+                                    <td class="py-3 px-4 text-on-surface-variant">CAM-01</td>
+                                    <td class="py-3 px-4 font-data-mono font-bold text-on-background">TN 01 AB 1234</td>
+                                    <td class="py-3 px-4 text-on-surface">Express Link</td>
+                                    <td class="py-3 px-4 font-data-mono text-on-surface-variant">B12</td>
+                                    <td class="py-3 px-4">
+                                        <span
+                                            class="inline-flex items-center px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold gap-1 border border-emerald-200">
+                                            <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                            Verified
+                                        </span>
+                                    </td>
+                                </tr>
+                                <!-- Other Rows -->
+                                <tr class="hover:bg-surface-container-low cursor-pointer transition-colors">
+                                    <td class="py-3 px-4 font-data-mono text-on-surface">10:38:22 AM</td>
+                                    <td class="py-3 px-4 text-on-surface-variant">CAM-02</td>
+                                    <td class="py-3 px-4 font-data-mono font-bold text-on-background">KL 07 CD 5678</td>
+                                    <td class="py-3 px-4 text-on-surface">City Circular</td>
+                                    <td class="py-3 px-4 font-data-mono text-on-surface-variant">B04</td>
+                                    <td class="py-3 px-4">
+                                        <span
+                                            class="inline-flex items-center px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold gap-1 border border-emerald-200">
+                                            <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                            Verified
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr
+                                    class="bg-surface-bright hover:bg-surface-container-low cursor-pointer transition-colors">
+                                    <td class="py-3 px-4 font-data-mono text-on-surface">10:35:05 AM</td>
+                                    <td class="py-3 px-4 text-on-surface-variant">CAM-01</td>
+                                    <td class="py-3 px-4 font-data-mono font-bold text-error">UNKNOWN</td>
+                                    <td class="py-3 px-4 text-on-surface-variant italic">No Match</td>
+                                    <td class="py-3 px-4 font-data-mono text-on-surface-variant">--</td>
+                                    <td class="py-3 px-4">
+                                        <span
+                                            class="inline-flex items-center px-2 py-1 rounded-full bg-error-container text-on-error-container text-xs font-semibold gap-1 border border-error/20">
+                                            <span class="material-symbols-outlined text-[14px]">warning</span>
+                                            Unverified
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-surface-container-low cursor-pointer transition-colors">
+                                    <td class="py-3 px-4 font-data-mono text-on-surface">10:29:41 AM</td>
+                                    <td class="py-3 px-4 text-on-surface-variant">CAM-03</td>
+                                    <td class="py-3 px-4 font-data-mono font-bold text-on-background">MH 12 EF 9012</td>
+                                    <td class="py-3 px-4 text-on-surface">Intercity Fast</td>
+                                    <td class="py-3 px-4 font-data-mono text-on-surface-variant">B12</td>
+                                    <td class="py-3 px-4">
+                                        <span
+                                            class="inline-flex items-center px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold gap-1 border border-emerald-200">
+                                            <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                            Verified
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination (Static) -->
+                    <div
+                        class="border-t border-outline-variant p-3 flex justify-between items-center bg-surface-container-lowest">
+                        <span class="font-label-md text-on-surface-variant">Showing 1-4 of 1,245 records</span>
+                        <div class="flex gap-1">
+                            <button
+                                class="p-1 rounded text-on-surface-variant hover:bg-surface-container disabled:opacity-50"><span
+                                    class="material-symbols-outlined">chevron_left</span></button>
+                            <button class="p-1 rounded text-on-surface-variant hover:bg-surface-container"><span
+                                    class="material-symbols-outlined">chevron_right</span></button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Capture Details Sidebar (Right) -->
+                <div
+                    class="w-[360px] bg-surface-container-lowest border border-outline-variant rounded-xl flex flex-col overflow-hidden shadow-[0_12px_24px_rgba(0,0,0,0.08)]">
+                    <div
+                        class="p-md border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
+                        <h3 class="font-headline-md text-headline-md text-on-surface">Capture Details</h3>
+                        <span
+                            class="inline-flex items-center px-2 py-1 rounded text-xs font-data-mono bg-surface-variant text-on-surface-variant">ID:
+                            ANP-8842</span>
+                    </div>
+                    <div class="p-md flex-1 overflow-y-auto space-y-md">
+                        <!-- Image Container -->
+                        <div class="rounded-lg overflow-hidden border border-outline-variant relative group">
+                            <img alt="Captured Bus Plate" class="w-full h-48 object-cover"
+                                data-alt="A high-contrast, slightly grainy security camera image of a city bus entering a modern transport hub. The license plate 'TN 01 AB 1234' is clearly visible and illuminated by harsh overhead LED lighting. Corporate infrastructure aesthetic."
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp5R6C00A_A__srojjlHO-jnx3S_4SxbqKxyEzO9rn5J-isRLnFTys8wcrkezWQ3Ho4FedeU4alVw2dSkgri-JC5xSIydUzHY0nm9v_MuqnpZlolhtvkmdj-VPcmltLVPgkyD58IIJHJ0WxrJ92lXUdRq6X15Xz5Vb9DIwfxlrti7qioLHELyKU3PHEZ4LdlViwnQOHgWE_B_MFkw2LERbqB7OTOn2zsDDNrzbZZEgycgIDITMlVL0dA">
+                            <!-- OCR Bounding Box overlay -->
+                            <div
+                                class="absolute bottom-4 left-1/2 -translate-x-1/2 border-2 border-primary bg-primary/20 backdrop-blur-sm px-2 py-1 rounded text-white font-data-mono font-bold text-lg shadow-lg">
+                                TN 01 AB 1234
+                            </div>
+                        </div>
+                        <!-- Analysis Grid -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-surface p-3 rounded-lg border border-outline-variant/50">
+                                <span class="block font-label-md text-on-surface-variant mb-1 uppercase">OCR
+                                    Confidence</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-data-mono text-lg font-bold text-emerald-600">96%</span>
+                                    <div class="h-2 flex-1 bg-surface-variant rounded-full overflow-hidden">
+                                        <div class="h-full bg-emerald-500 w-[96%]"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-surface p-3 rounded-lg border border-outline-variant/50">
+                                <span class="block font-label-md text-on-surface-variant mb-1 uppercase">Processing
+                                    Time</span>
+                                <span class="font-data-mono text-lg font-medium text-on-surface">124ms</span>
+                            </div>
+                        </div>
+                        <hr class="border-outline-variant">
+                        <!-- Matched Record Info -->
+                        <div>
+                            <h4 class="font-label-md text-on-surface-variant uppercase mb-3">Matched Bus Record</h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-on-surface-variant font-body-md">Fleet ID</span>
+                                    <span class="font-data-mono text-on-surface font-medium">BUS-402</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-on-surface-variant font-body-md">Route</span>
+                                    <span class="font-body-md text-on-surface font-medium">Express Link</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-on-surface-variant font-body-md">Operator</span>
+                                    <span class="font-body-md text-on-surface font-medium">Metro Transit Auth.</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-on-surface-variant font-body-md">Schedule Status</span>
+                                    <span class="font-body-md text-emerald-600 font-medium">On Time (+1m)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Action Buttons -->
+                    <div class="p-md border-t border-outline-variant bg-surface-container-lowest flex gap-3">
+                        <button
+                            class="flex-1 py-2 px-4 border border-outline-variant text-on-surface-variant rounded-lg font-body-md font-medium hover:bg-surface-container transition-colors">Flag
+                            Review</button>
+                        <button
+                            class="flex-1 py-2 px-4 bg-primary text-white rounded-lg font-body-md font-medium hover:bg-surface-tint shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all">Confirm
+                            Match</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!-- Footer -->
+        <footer
+            class="bg-surface-container-low dark:bg-surface-container-low fixed bottom-0 right-0 w-[calc(100%-280px)] h-8 border-t border-outline-variant dark:border-outline flex items-center justify-between px-md w-full z-40">
+            <span class="font-label-md text-label-md text-on-surface">System Uptime: 99.9% | AI Engine: YOLOv11 Active |
+                DB: Connected</span>
+            <div class="flex gap-4">
+                <a class="font-label-md text-label-md text-on-surface-variant hover:underline opacity-90"
+                    href="#">Status</a>
+                <a class="font-label-md text-label-md text-on-surface-variant hover:underline opacity-90" href="#">Help
+                    Desk</a>
+                <a class="font-label-md text-label-md text-on-surface-variant hover:underline opacity-90"
+                    href="#">Security</a>
+            </div>
+        </footer>
+    </div>
+
+
+</body>
+
+</html>

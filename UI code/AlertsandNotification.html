@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Smart Bus Stand Admin - Alerts &amp; Notifications</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#fefcff",
+                        "secondary-fixed-dim": "#c0c7cf",
+                        "outline": "#727785",
+                        "tertiary-container": "#b75b00",
+                        "inverse-primary": "#adc6ff",
+                        "secondary-container": "#dce3eb",
+                        "on-primary-fixed-variant": "#004395",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "on-background": "#0b1c30",
+                        "on-tertiary-fixed": "#311400",
+                        "background": "#f8f9ff",
+                        "surface": "#f8f9ff",
+                        "surface-container-low": "#eff4ff",
+                        "on-surface": "#0b1c30",
+                        "on-secondary-fixed-variant": "#40484e",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#d3e4fe",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#d8e2ff",
+                        "surface-bright": "#f8f9ff",
+                        "on-primary-fixed": "#001a42",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "primary-container": "#2170e4",
+                        "primary": "#0058be",
+                        "surface-container-highest": "#d3e4fe",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-secondary-fixed": "#151c22",
+                        "surface-container-high": "#dce9ff",
+                        "outline-variant": "#c2c6d6",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-secondary-container": "#5e656c",
+                        "inverse-surface": "#213145",
+                        "tertiary": "#924700",
+                        "secondary-fixed": "#dce3eb",
+                        "surface-container": "#e5eeff",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#424754",
+                        "secondary": "#585f66",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "surface-tint": "#005ac2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "xl": "32px",
+                        "container-margin": "24px",
+                        "base": "8px",
+                        "md": "16px",
+                        "sm": "8px",
+                        "xs": "4px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "data-mono": ["Inter"],
+                        "display": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "data-mono": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-surface text-on-surface flex min-h-screen">
+    <!-- SideNavBar -->
+    <aside
+        class="dark:bg-surface-container-low font-headline-md text-headline-md font-body-md text-body-md fixed left-0 top-0 h-screen w-[280px] border-r border-outline-variant dark:border-outline flex flex-col h-full py-md px-base z-50 bg-surface-container-lowest">
+        <div class="mb-lg px-md pt-sm">
+            <h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">Smart Bus
+                Stand</h1>
+            <p class="font-label-md text-label-md text-on-surface-variant">Management Portal</p>
+        </div>
+        <nav class="flex-1 overflow-y-auto">
+            <ul class="space-y-xs">
+                <li class="">
+                    <a class="flex items-center px-md py-sm rounded-DEFAULT text-on-surface-variant dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant transition-colors group"
+                        href="#">
+                        <span class="material-symbols-outlined mr-md text-[20px]" data-icon="dashboard">dashboard</span>
+                        <span class="font-body-md text-body-md">Dashboard</span>
+                    </a>
+                </li>
+                <li class="">
+                    <a class="flex items-center px-md py-sm rounded-DEFAULT text-on-surface-variant dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant transition-colors group"
+                        href="#">
+                        <span class="material-symbols-outlined mr-md text-[20px]" data-icon="videocam">videocam</span>
+                        <span class="font-body-md text-body-md">Live Monitoring</span>
+                    </a>
+                </li>
+                <li class="">
+                    <a class="flex items-center px-md py-sm rounded-DEFAULT text-on-surface-variant dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant transition-colors group"
+                        href="#">
+                        <span class="material-symbols-outlined mr-md text-[20px]"
+                            data-icon="directions_bus">directions_bus</span>
+                        <span class="font-body-md text-body-md">Bus Management</span>
+                    </a>
+                </li>
+                <li class="">
+                    <a class="flex items-center px-md py-sm rounded-DEFAULT text-on-surface-variant dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant transition-colors group"
+                        href="#">
+                        <span class="material-symbols-outlined mr-md text-[20px]" data-icon="route">route</span>
+                        <span class="font-body-md text-body-md">Route Management</span>
+                    </a>
+                </li>
+                <li class="">
+                    <a class="flex items-center px-md py-sm rounded-DEFAULT text-on-surface-variant dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant transition-colors group"
+                        href="#">
+                        <span class="material-symbols-outlined mr-md text-[20px]" data-icon="schedule">schedule</span>
+                        <span class="font-body-md text-body-md">Schedule &amp; Timings</span>
+                    </a>
+                </li>
+                <li class="">
+                    <a class="flex items-center px-md py-sm rounded-DEFAULT text-on-surface-variant dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant transition-colors group"
+                        href="#">
+                        <span class="material-symbols-outlined mr-md text-[20px]"
+                            data-icon="local_parking">local_parking</span>
+                        <span class="font-body-md text-body-md">Parking Bay Management</span>
+                    </a>
+                </li>
+                <li class="">
+                    <a class="flex items-center px-md py-sm rounded-DEFAULT text-on-surface-variant dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant transition-colors group"
+                        href="#">
+                        <span class="material-symbols-outlined mr-md text-[20px]"
+                            data-icon="linked_camera">linked_camera</span>
+                        <span class="font-body-md text-body-md">ANPR Records</span>
+                    </a>
+                </li>
+                <li class="">
+                    <a class="flex items-center px-md py-sm rounded-DEFAULT text-primary dark:text-inverse-primary font-bold border-r-4 border-primary bg-surface-container-high opacity-90 transition-all duration-200"
+                        href="#">
+                        <span class="material-symbols-outlined mr-md text-[20px]" data-icon="notifications_active"
+                            data-weight="fill" style="font-variation-settings: 'FILL' 1;">notifications_active</span>
+                        <span class="font-body-md text-body-md">Alerts &amp; Notifications</span>
+                    </a>
+                </li>
+                <li class="">
+                    <a class="flex items-center px-md py-sm rounded-DEFAULT text-on-surface-variant dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant transition-colors group"
+                        href="#">
+                        <span class="material-symbols-outlined mr-md text-[20px]" data-icon="analytics">analytics</span>
+                        <span class="font-body-md text-body-md">Reports &amp; Analytics</span>
+                    </a>
+                </li>
+                <li class="">
+                    <a class="flex items-center px-md py-sm rounded-DEFAULT text-on-surface-variant dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant transition-colors group"
+                        href="#">
+                        <span class="material-symbols-outlined mr-md text-[20px]"
+                            data-icon="health_and_safety">health_and_safety</span>
+                        <span class="font-body-md text-body-md">System Health</span>
+                    </a>
+                </li>
+                <li class="">
+                    <a class="flex items-center px-md py-sm rounded-DEFAULT text-on-surface-variant dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant transition-colors group"
+                        href="#">
+                        <span class="material-symbols-outlined mr-md text-[20px]" data-icon="history">history</span>
+                        <span class="font-body-md text-body-md">Activity Logs</span>
+                    </a>
+                </li>
+                <li class="">
+                    <a class="flex items-center px-md py-sm rounded-DEFAULT text-on-surface-variant dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant transition-colors group"
+                        href="#">
+                        <span class="material-symbols-outlined mr-md text-[20px]"
+                            data-icon="settings_backup_restore">settings_backup_restore</span>
+                        <span class="font-body-md text-body-md">Backup &amp; Restore</span>
+                    </a>
+                </li>
+                <li class="">
+                    <a class="flex items-center px-md py-sm rounded-DEFAULT text-on-surface-variant dark:text-secondary-fixed-dim hover:bg-surface-container-high dark:hover:bg-on-secondary-fixed-variant transition-colors group"
+                        href="#">
+                        <span class="material-symbols-outlined mr-md text-[20px]" data-icon="settings">settings</span>
+                        <span class="font-body-md text-body-md">Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+    <!-- Main Content Area -->
+    <div class="flex-1 ml-[280px] flex flex-col min-h-screen">
+        <!-- TopNavBar -->
+        <header
+            class="bg-surface dark:bg-surface-container-lowest font-headline-md text-headline-md font-label-md text-label-md docked full-width top-0 border-b border-outline-variant dark:border-outline shadow-sm flex justify-between items-center w-full px-lg h-16 sticky z-40">
+            <div class="flex items-center">
+                <h2 class="font-headline-md text-headline-md font-extrabold text-primary dark:text-primary-fixed-dim">
+                    Smart Bus Stand Admin</h2>
+            </div>
+            <div class="flex items-center space-x-lg">
+                <div class="relative hidden md:block">
+                    <span
+                        class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant"
+                        data-icon="search">search</span>
+                    <input
+                        class="pl-xl pr-sm py-sm border border-outline-variant rounded-DEFAULT bg-surface text-on-surface font-body-md text-body-md focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none w-64 transition-all"
+                        placeholder="Search..." type="text">
+                </div>
+                <div class="flex items-center space-x-sm">
+                    <button
+                        class="p-sm rounded-full text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-variant transition-transform active:scale-95">
+                        <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+                    </button>
+                    <button
+                        class="p-sm rounded-full text-on-surface-variant hover:bg-surface-container-low dark:hover:bg-surface-variant transition-transform active:scale-95">
+                        <span class="material-symbols-outlined" data-icon="schedule">schedule</span>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-sm border-l border-outline-variant pl-lg">
+                    <div class="flex flex-col items-end">
+                        <span class="font-label-md text-label-md text-primary">System Operational</span>
+                        <span class="font-label-md text-label-md text-on-surface-variant">Admin Profile</span>
+                    </div>
+                    <img alt="Admin Avatar" class="w-8 h-8 rounded-full border border-outline-variant"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoAixnW77zWONFq5yG7OkGXtR5RWvyDyoTotPzBzWhqscG4jXgXL3GYqYZz8T4iFckDSsIEv8HCfOPOazLVCfox_QkvRSTwJZ1gz8sJqmyvaT7IBsWFpTsHH8JuHyqlKS_F5tqxrG9BKO83kKVFefR2HanDr9jZvCT0GI_VINbsOlzd5sNzyyfoHlx2qZwMdi7Z0IU4ml-6nnJXpisU6vroCO64kE20gGfwA-Zvi6Hzj73Q9SkaJ7kqg">
+                </div>
+            </div>
+        </header>
+        <!-- Canvas -->
+        <main class="flex-1 p-lg bg-background">
+            <div class="mb-lg">
+                <h1 class="font-headline-lg text-headline-lg text-on-surface">Alerts &amp; Notifications</h1>
+                <p class="font-body-md text-body-md text-on-surface-variant mt-xs">Monitor operational and AI system
+                    alerts</p>
+            </div>
+            <!-- KPI Cards Bento Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md mb-xl">
+                <div
+                    class="bg-surface border border-outline-variant rounded-lg p-md shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 opacity-5">
+                        <span class="material-symbols-outlined text-[100px]"
+                            data-icon="notifications">notifications</span>
+                    </div>
+                    <div>
+                        <span class="font-label-md text-label-md text-on-surface-variant uppercase">Total Alerts</span>
+                        <div class="font-display text-display text-primary mt-sm">7</div>
+                    </div>
+                    <div class="mt-md flex items-center text-secondary">
+                        <span class="material-symbols-outlined text-[16px] mr-xs" data-icon="update">update</span>
+                        <span class="font-label-md text-label-md">Last 24 hours</span>
+                    </div>
+                </div>
+                <div
+                    class="bg-surface border border-error/30 rounded-lg p-md shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 opacity-5 text-error">
+                        <span class="material-symbols-outlined text-[100px]" data-icon="error">error</span>
+                    </div>
+                    <div>
+                        <span class="font-label-md text-label-md text-error uppercase font-bold flex items-center">
+                            <span class="w-2 h-2 rounded-full bg-error mr-2 animate-pulse"></span>
+                            Critical
+                        </span>
+                        <div class="font-display text-display text-on-surface mt-sm">2</div>
+                    </div>
+                    <div class="mt-md flex items-center text-error">
+                        <span class="material-symbols-outlined text-[16px] mr-xs" data-icon="warning">warning</span>
+                        <span class="font-label-md text-label-md">Requires immediate action</span>
+                    </div>
+                </div>
+                <div
+                    class="bg-surface border border-tertiary-container/30 rounded-lg p-md shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 opacity-5 text-tertiary">
+                        <span class="material-symbols-outlined text-[100px]"
+                            data-icon="warning_amber">warning_amber</span>
+                    </div>
+                    <div>
+                        <span class="font-label-md text-label-md text-tertiary uppercase">Warnings</span>
+                        <div class="font-display text-display text-on-surface mt-sm">3</div>
+                    </div>
+                    <div class="mt-md flex items-center text-tertiary">
+                        <span class="material-symbols-outlined text-[16px] mr-xs" data-icon="info">info</span>
+                        <span class="font-label-md text-label-md">Monitor closely</span>
+                    </div>
+                </div>
+                <div
+                    class="bg-surface border border-outline-variant rounded-lg p-md shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 opacity-5 text-primary">
+                        <span class="material-symbols-outlined text-[100px]"
+                            data-icon="check_circle">check_circle</span>
+                    </div>
+                    <div>
+                        <span class="font-label-md text-label-md text-secondary uppercase">Resolved</span>
+                        <div class="font-display text-display text-on-surface mt-sm">12</div>
+                    </div>
+                    <div class="mt-md flex items-center text-secondary">
+                        <span class="material-symbols-outlined text-[16px] mr-xs" data-icon="task_alt">task_alt</span>
+                        <span class="font-label-md text-label-md">Cleared today</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Alerts List / Data Table Area -->
+            <div class="bg-surface border border-outline-variant rounded-lg shadow-sm overflow-hidden flex flex-col">
+                <div
+                    class="p-md border-b border-outline-variant bg-surface-container-lowest flex justify-between items-center">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Active Alerts Feed</h3>
+                    <div class="flex space-x-sm">
+                        <button
+                            class="px-md py-sm border border-outline-variant rounded-DEFAULT font-label-md text-label-md text-on-surface hover:bg-surface-container-low transition-colors flex items-center">
+                            <span class="material-symbols-outlined mr-xs text-[16px]"
+                                data-icon="filter_list">filter_list</span>
+                            Filter
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[800px]">
+                        <thead>
+                            <tr class="border-b border-outline-variant bg-surface-container-low">
+                                <th
+                                    class="p-sm font-label-md text-label-md text-on-surface-variant font-semibold pl-md w-12">
+                                </th>
+                                <th class="p-sm font-label-md text-label-md text-on-surface-variant font-semibold">Type
+                                    / Timestamp</th>
+                                <th class="p-sm font-label-md text-label-md text-on-surface-variant font-semibold">
+                                    Details</th>
+                                <th
+                                    class="p-sm font-label-md text-label-md text-on-surface-variant font-semibold text-right pr-md">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="font-body-md text-body-md text-on-surface">
+                            <!-- Alert Item 1: Critical -->
+                            <tr
+                                class="border-b border-outline-variant hover:bg-surface-container-lowest transition-colors bg-error-container/10">
+                                <td class="p-sm pl-md text-center align-top pt-md">
+                                    <span class="material-symbols-outlined text-error text-[24px]"
+                                        data-icon="videocam_off">videocam_off</span>
+                                </td>
+                                <td class="p-sm align-top pt-md">
+                                    <div class="flex flex-col">
+                                        <span
+                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-error text-on-error uppercase w-max mb-1">CRITICAL</span>
+                                        <span class="font-data-mono text-data-mono text-on-surface-variant">10:30
+                                            AM</span>
+                                    </div>
+                                </td>
+                                <td class="p-sm align-top pt-md">
+                                    <div class="font-semibold text-on-surface mb-xs">Camera 04 Offline</div>
+                                    <div class="text-on-surface-variant text-sm">Main entrance ANPR camera has lost
+                                        connection to the server.</div>
+                                </td>
+                                <td class="p-sm align-top pt-md pr-md text-right">
+                                    <div class="flex justify-end space-x-sm">
+                                        <button
+                                            class="px-sm py-xs border border-primary text-primary rounded-DEFAULT hover:bg-primary/5 transition-colors font-label-md text-label-md flex items-center">
+                                            <span class="material-symbols-outlined mr-xs text-[16px]"
+                                                data-icon="build">build</span>
+                                            Diagnose
+                                        </button>
+                                        <button
+                                            class="px-sm py-xs bg-primary text-on-primary rounded-DEFAULT hover:bg-primary/90 transition-colors font-label-md text-label-md">
+                                            Resolve
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Alert Item 2: Warning (Bay Conflict) -->
+                            <tr
+                                class="border-b border-outline-variant hover:bg-surface-container-lowest transition-colors bg-tertiary-container/5">
+                                <td class="p-sm pl-md text-center align-top pt-md">
+                                    <span class="material-symbols-outlined text-tertiary text-[24px]"
+                                        data-icon="directions_bus">directions_bus</span>
+                                </td>
+                                <td class="p-sm align-top pt-md">
+                                    <div class="flex flex-col">
+                                        <span
+                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-tertiary-container text-on-tertiary-container uppercase w-max mb-1">BAY
+                                            CONFLICT</span>
+                                        <span class="font-data-mono text-data-mono text-on-surface-variant">10:15
+                                            AM</span>
+                                    </div>
+                                </td>
+                                <td class="p-sm align-top pt-md">
+                                    <div class="font-semibold text-on-surface mb-xs">Bay B12 - Multiple buses detected
+                                    </div>
+                                    <div class="text-on-surface-variant text-sm">
+                                        ANPR detected <span class="font-data-mono font-bold">TN 01 AN 2345</span> and
+                                        <span class="font-data-mono font-bold">TN 01 AP 1284</span> in the same bay
+                                        area.
+                                    </div>
+                                </td>
+                                <td class="p-sm align-top pt-md pr-md text-right">
+                                    <div class="flex justify-end space-x-sm">
+                                        <button
+                                            class="px-sm py-xs border border-outline-variant text-on-surface-variant rounded-DEFAULT hover:bg-surface-container-low transition-colors font-label-md text-label-md flex items-center">
+                                            <span class="material-symbols-outlined mr-xs text-[16px]"
+                                                data-icon="visibility">visibility</span>
+                                            View Cameras
+                                        </button>
+                                        <button
+                                            class="px-sm py-xs bg-surface-variant text-on-surface rounded-DEFAULT hover:bg-surface-container-high transition-colors font-label-md text-label-md border border-outline-variant">
+                                            Reassign Bay
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Alert Item 3: Warning (Unknown Bus) -->
+                            <tr
+                                class="border-b border-outline-variant hover:bg-surface-container-lowest transition-colors bg-surface-container-low/50">
+                                <td class="p-sm pl-md text-center align-top pt-md">
+                                    <span class="material-symbols-outlined text-secondary text-[24px]"
+                                        data-icon="help_outline">help_outline</span>
+                                </td>
+                                <td class="p-sm align-top pt-md">
+                                    <div class="flex flex-col">
+                                        <span
+                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface-variant text-on-surface-variant uppercase w-max mb-1 border border-outline-variant">UNKNOWN
+                                            BUS</span>
+                                        <span class="font-data-mono text-data-mono text-on-surface-variant">09:42
+                                            AM</span>
+                                    </div>
+                                </td>
+                                <td class="p-sm align-top pt-md">
+                                    <div class="font-semibold text-on-surface mb-xs">Unknown registration detected</div>
+                                    <div class="text-on-surface-variant text-sm">A vehicle not found in the daily
+                                        manifest entered via North Gate.</div>
+                                </td>
+                                <td class="p-sm align-top pt-md pr-md text-right">
+                                    <div class="flex justify-end space-x-sm">
+                                        <button
+                                            class="px-sm py-xs border border-outline-variant text-on-surface-variant rounded-DEFAULT hover:bg-surface-container-low transition-colors font-label-md text-label-md flex items-center">
+                                            <span class="material-symbols-outlined mr-xs text-[16px]"
+                                                data-icon="visibility">visibility</span>
+                                            View Cameras
+                                        </button>
+                                        <button
+                                            class="px-sm py-xs bg-primary text-on-primary rounded-DEFAULT hover:bg-primary/90 transition-colors font-label-md text-label-md">
+                                            Resolve
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+        <!-- Footer -->
+        <footer
+            class="bg-surface-container-lowest dark:bg-surface-container-high font-label-md text-label-md docked full-width bottom-0 border-t border-outline-variant dark:border-outline flex justify-between items-center w-full px-lg py-xs">
+            <div class="text-secondary dark:text-secondary-fixed-dim">
+                System Uptime: 99.9% | AI Engine: YOLOv11 Active | DB: Connected
+            </div>
+            <div class="flex space-x-md text-secondary">
+                <a class="hover:text-primary underline transition-colors duration-150" href="#">Status Page</a>
+                <a class="hover:text-primary underline transition-colors duration-150" href="#">Privacy Policy</a>
+                <a class="hover:text-primary underline transition-colors duration-150" href="#">Technical Support</a>
+            </div>
+        </footer>
+    </div>
+
+
+</body>
+
+</html>

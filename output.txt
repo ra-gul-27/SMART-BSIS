@@ -1,0 +1,218 @@
+AI-POWERED SMART BUS STAND INFORMATION SYSTEM
+Automated Bus Recognition, Rule-Based Parking Bay Identification, and Passenger Advisory
+Final Year Project – Complete Technical & Implementation Document
+1. Project Overview
+The proposed system is an AI-powered smart bus stand information system that automates bus recognition, parking-bay confirmation, transport-information retrieval, and passenger guidance. CCTV video is used as the primary sensing source instead of GPS-based bus tracking. YOLOv11 detects buses in real time, ANPR identifies the bus registration number, and a rule-based spatial module determines the occupied/designated bay from predefined regions. PostgreSQL stores transport information. A Python-based passenger mobile application presents bus information, while a separate Python-based admin desktop application manages transport details and bay availability.
+2. Problem Statement
+Public bus stands often depend on manual announcements, enquiry counters, and static display boards. These methods do not automatically determine which bus is present at which parking bay. During peak hours, passengers may experience confusion, increased waiting time, and difficulty locating the correct bus. Existing solutions commonly address vehicle detection, parking monitoring, or license-plate recognition separately. A unified system is therefore required to connect real-time bus detection, bus identification, bay confirmation, transport-information retrieval, and passenger guidance.
+3. Existing System
+Manual announcements and enquiry counters are commonly used for passenger assistance.
+Static display boards mainly provide scheduled information and do not automatically confirm the current bus position.
+GPS-based bus tracking provides geographic location while a bus is moving, but it does not directly perform camera-based parking-bay confirmation.
+Research systems commonly focus on individual tasks such as vehicle detection, parking occupancy, or ANPR.
+The proposed work combines relevant computer-vision capabilities specifically for a bus-stand environment without depending on GPS.
+4. Proposed System
+CCTV cameras observe the bus stand. OpenCV captures and prepares frames, YOLOv11 detects buses, and rule-based geometric logic maps the detected bus position to a predefined bay. ANPR extracts the registration number, which is matched with PostgreSQL to retrieve destination, route, departure time, fare, and bay information. The passenger application displays the information, while the admin application allows authorized personnel to manage bus schedules, fares, routes, bay assignments, and unavailable bays.
+5. Complete Top-to-Bottom Workflow
+CCTV Video Capture: A CCTV camera provides the live bus-stand video stream.
+Frame Acquisition: OpenCV reads the stream frame by frame and performs required image handling such as resizing, cropping, or format conversion.
+Bus Detection: YOLOv11 detects buses and returns bounding boxes, class labels, and confidence scores.
+Multi-Frame Confirmation: Detected positions can be associated across consecutive frames so that one-frame false detections do not immediately become a published result.
+Parking Bay Identification: Each bay is represented by a predefined polygon/region. The bus centroid or bottom-center point is tested against these regions to identify the bay.
+ANPR: The license-plate region is processed by the ANPR/OCR pipeline to recognize the registration number.
+Bus Record Matching: The recognized registration number is matched with the PostgreSQL transport database.
+Information Retrieval: Destination, route, departure time, fare, and bay details are retrieved.
+Passenger Advisory: The mobile application displays current bus information and the corresponding bay guidance.
+Admin Management: The admin application allows authorized users to modify transport information, schedules, fares, routes, and bay availability.
+6. System Architecture
+CCTV Camera → OpenCV Frame Processing → YOLOv11 Bus Detection → Rule-Based Bay Identification → ANPR → FastAPI Backend → PostgreSQL Database → Passenger Mobile Application / Admin Desktop Application
+FastAPI provides the API layer. Uvicorn runs the FastAPI application as an ASGI server. The architecture separates AI/data processing from the passenger and admin interfaces.
+7. Major Modules
+CCTV Input Module: Receives the live camera stream.
+OpenCV Computer-Vision Module: Captures frames, performs preprocessing/cropping, and handles visualization.
+YOLOv11 Bus Detection: Detects buses in real time.
+Rule-Based Bay Identification: Maps bus position to a predefined parking-bay region.
+ANPR Module: Recognizes the bus registration number.
+PostgreSQL Database: Stores bus, route, schedule, fare, and bay configuration information.
+FastAPI Backend: Provides APIs for applications and controlled data operations.
+Passenger Mobile Application: Displays destination, route, departure time, fare, and parking bay.
+Admin Desktop Application: Manages transport details, schedules, fares, routes, and bay availability.
+8. Technology Stack
+Layer
+Technology
+Purpose
+Programming
+Python 3.12
+Primary development language
+Passenger Mobile UI
+KivyMD
+Python-based Android/mobile interface
+Admin UI
+CustomTkinter
+Python desktop administration interface
+Backend API
+FastAPI
+REST API layer
+API Server
+Uvicorn
+ASGI server for FastAPI
+Object Detection
+YOLOv11 / Ultralytics
+Real-time bus detection
+Computer Vision
+OpenCV
+CCTV/video and image processing
+ANPR/OCR
+EasyOCR or selected OCR engine
+Registration-number recognition
+Numerical Processing
+NumPy
+Array/image-data operations
+Database
+PostgreSQL
+Persistent transport information
+Version Control
+Git / GitHub
+Source-code management
+IDE
+Visual Studio Code
+Development environment
+9. Advanced Tools and Updated Framework
+YOLOv11 is used instead of older YOLO versions for modern real-time bus detection.
+ANPR provides unique bus identification through the registration number.
+Rule-based bay identification is used because bus bays are fixed spatial regions; this avoids unnecessary model training for bay classification.
+FastAPI + Uvicorn provides a structured API layer between processing services, the database, and applications.
+KivyMD provides the passenger mobile interface using Python.
+CustomTkinter provides a dedicated admin desktop interface.
+PostgreSQL provides centralized and persistent transport-data management.
+Multi-frame confirmation, confidence thresholds, and OCR validation can reduce unstable detections.
+Editable bay configuration allows the admin to disable unavailable bays or modify bay mappings when the terminal layout changes.
+10. Database – High-Level Design
+Bus: bus_id, registration_number, route_id, destination, fare, active_status.
+Route: route_id, route_name, source, destination.
+Schedule: schedule_id, bus_id, departure_time, arrival_time.
+Bay: bay_id, bay_name, polygon/configuration, active_status.
+Detection/Bay Assignment: bus_id, bay_id, timestamp, confidence/status.
+Admin configuration: bay availability and editable operational parameters.
+11. Rule-Based Parking Bay Identification
+Each physical bay is represented by a predefined polygon or rectangular region in the camera coordinate system. When YOLOv11 detects a bus, the system calculates a representative point such as the bounding-box center or bottom-center. A point-in-polygon or region-membership test determines which bay contains the point. The result can be confirmed over several consecutive frames before it is published to passengers. This approach is computationally lightweight and appropriate for fixed bus-bay layouts.
+12. ANPR Workflow
+Receive the detected bus frame or plate-focused crop.
+Locate/crop the license-plate region.
+Preprocess the crop using OpenCV where required.
+Run OCR/ANPR to recognize the registration characters.
+Apply confidence and plate-format validation.
+Use repeated frames to improve reliability.
+Match the final registration number with the PostgreSQL bus record.
+13. Passenger Mobile Application Workflow
+Passenger opens the application.
+Application requests current bus information from the FastAPI backend.
+Backend obtains the latest confirmed detection and database information.
+Application displays bus number, destination, route, departure time, fare, and parking bay.
+Passenger uses the displayed bay information to locate the bus.
+14. Admin Application Workflow
+Admin authenticates into the desktop application.
+Admin adds or modifies bus and route information.
+Admin updates schedules and fares.
+Admin configures bay names and bay availability.
+Unavailable bays can be temporarily disabled for maintenance, construction, or operational reasons.
+Admin can review detection status/history where implemented.
+Changes are sent through the API and stored in PostgreSQL.
+15. Dataset Requirements
+The implementation should combine suitable public datasets with a project-specific bus-stand dataset where licensing and availability permit. The final data should represent the target camera viewpoint, lighting, bus appearance, occlusion, and license-plate variation.
+Bus detection: public vehicle/bus datasets plus custom CCTV frames.
+ANPR: suitable public license-plate datasets plus legally collected/custom samples for the target environment.
+Parking bays: custom images/video frames because fixed bay geometry is site-specific.
+Annotations: bus bounding boxes and required license-plate regions.
+Dataset split: training, validation, and testing sets with no data leakage.
+16. Model Training and Inference
+Start with a pretrained YOLOv11 model.
+Prepare and annotate the bus-detection dataset.
+Fine-tune YOLOv11 for the target environment.
+Validate using an independent validation set.
+Test on unseen CCTV scenes.
+Measure precision, recall, mAP, and inference speed.
+Evaluate ANPR using character/full-plate recognition accuracy and confidence.
+17. Evaluation Metrics
+Component
+Metrics
+Purpose
+YOLOv11
+Precision, Recall, mAP@50, mAP@50-95, FPS/latency
+Bus-detection quality and real-time performance
+ANPR
+Plate/character recognition accuracy, confidence
+Identification reliability
+Bay Identification
+Bay classification accuracy
+Correct parking-bay assignment
+API
+Response time, throughput
+Communication performance
+End-to-End
+Detection-to-display latency
+Overall real-time usefulness
+18. Key Advantages
+Does not require GPS for bus-bay confirmation.
+Uses CCTV as the primary sensing source.
+Integrates bus detection, identification, bay confirmation, database retrieval, and passenger advisory.
+Rule-based bay logic is lightweight and suitable for fixed terminal layouts.
+Separate passenger and admin applications provide clear role separation.
+Python-based development simplifies integration of AI and application components.
+19. Limitations and Risk Handling
+Poor lighting, rain, glare, and camera obstruction may reduce detection quality.
+Partially visible or dirty plates can reduce ANPR accuracy.
+Camera movement requires bay-region recalibration.
+Network failure can interrupt application communication.
+Large multi-camera deployments may require GPU acceleration and distributed processing.
+The final project should report measured performance rather than claiming 100% accuracy.
+20. Security and Privacy
+Admin functions should use authentication and authorization.
+API inputs should be validated and unauthorized updates blocked.
+Database credentials should be stored securely rather than hard-coded.
+License-plate information should be used only for the defined transport-management purpose.
+Logs should avoid unnecessary personal information.
+21. Development Plan
+Phase
+Work
+1
+Requirements, literature survey, and bus-stand/camera study
+2
+Dataset collection, annotation, and preprocessing
+3
+YOLOv11 fine-tuning and bus-detection testing
+4
+ANPR pipeline development and validation
+5
+Rule-based bay mapping and multi-frame confirmation
+6
+FastAPI + Uvicorn backend and PostgreSQL integration
+7
+KivyMD passenger mobile application
+8
+CustomTkinter admin application
+9
+End-to-end integration, testing, and performance evaluation
+10
+Documentation, demonstration, and final deployment
+22. Expected Outputs
+Real-time bus detection from CCTV.
+Bus registration-number recognition through ANPR.
+Confirmed parking-bay identification.
+Destination, route, departure time, fare, and bay information.
+Passenger mobile application for bus information and bay guidance.
+Admin desktop application for transport and bay management.
+Measured performance using computer-vision and system-level metrics.
+23. Research Gap and Proposed Contribution
+The reviewed literature commonly addresses vehicle detection, parking monitoring, or license-plate recognition as separate problems. The proposed work adapts these methodologies to a bus-terminal environment and integrates YOLOv11 bus detection, ANPR, fixed-region rule-based bay identification, transport database retrieval, passenger advisory, and admin management. The contribution is therefore the bus-stand-specific system integration and workflow, rather than claiming that YOLOv11 or ANPR itself is a new algorithm.
+24. Technical Explanation for Review
+Why YOLOv11? It provides a modern real-time object-detection model suitable for continuous CCTV inference.
+Why OpenCV? It captures video, handles frames, performs preprocessing/cropping, and supports computer-vision operations.
+Why ANPR? A registration number provides a stronger unique identifier for matching a detected bus with transport records.
+Why rule-based bay identification? Bus bays are fixed spatial zones, so predefined regions provide a simple, fast, and maintainable solution.
+Why FastAPI? It provides structured APIs between the processing/database layer and the applications.
+Why Uvicorn? It runs the FastAPI application as an ASGI server and handles incoming API requests.
+Why PostgreSQL? It provides persistent, structured storage for transport and bay-management data.
+Why Python mobile development? KivyMD allows the passenger application to remain within the project's Python technology stack.
+25. Complete One-Line Workflow
+CCTV → OpenCV → YOLOv11 Bus Detection → Rule-Based Bay Identification → ANPR → FastAPI/Uvicorn → PostgreSQL → Passenger Mobile App + Admin Desktop App

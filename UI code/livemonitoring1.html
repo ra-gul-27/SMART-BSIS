@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Smart Bus Stand - Live Monitoring</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#fefcff",
+                        "secondary-fixed-dim": "#c0c7cf",
+                        "outline": "#727785",
+                        "tertiary-container": "#b75b00",
+                        "inverse-primary": "#adc6ff",
+                        "secondary-container": "#dce3eb",
+                        "on-primary-fixed-variant": "#004395",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "on-background": "#0b1c30",
+                        "on-tertiary-fixed": "#311400",
+                        "background": "#f8f9ff",
+                        "surface": "#f8f9ff",
+                        "surface-container-low": "#eff4ff",
+                        "on-surface": "#0b1c30",
+                        "on-secondary-fixed-variant": "#40484e",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#d3e4fe",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#d8e2ff",
+                        "surface-bright": "#f8f9ff",
+                        "on-primary-fixed": "#001a42",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "primary-container": "#2170e4",
+                        "primary": "#0058be",
+                        "surface-container-highest": "#d3e4fe",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-secondary-fixed": "#151c22",
+                        "surface-container-high": "#dce9ff",
+                        "outline-variant": "#c2c6d6",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-secondary-container": "#5e656c",
+                        "inverse-surface": "#213145",
+                        "tertiary": "#924700",
+                        "secondary-fixed": "#dce3eb",
+                        "surface-container": "#e5eeff",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#424754",
+                        "secondary": "#585f66",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "surface-tint": "#005ac2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "xl": "32px",
+                        "container-margin": "24px",
+                        "base": "8px",
+                        "md": "16px",
+                        "sm": "8px",
+                        "xs": "4px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "data-mono": ["Inter"],
+                        "display": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["28px", { "lineHeight": "36px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "data-mono": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "display": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-surface text-on-surface flex w-full min-h-screen overflow-x-hidden">
+    <!-- SideNavBar -->
+    <nav
+        class="bg-surface-bright hidden md:flex border-r border-outline-variant fixed left-0 top-0 h-screen w-[280px] flex-col p-md z-50">
+        <div class="mb-lg px-sm">
+            <h1 class="font-headline-md text-headline-md font-bold text-primary">Smart Bus Stand</h1>
+            <p class="font-label-md text-label-md text-on-surface-variant mt-xs">Management Portal</p>
+        </div>
+        <ul class="flex flex-col gap-sm flex-grow overflow-y-auto w-full">
+            <li class="">
+                <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200 w-full font-body-md text-body-md"
+                    href="#">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+                    Dashboard
+                </a>
+            </li>
+            <li class="">
+                <a class="flex items-center gap-md px-md py-sm rounded-lg text-primary font-bold bg-secondary-container transition-colors duration-200 w-full font-body-md text-body-md"
+                    href="#">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">videocam</span>
+                    Live Monitoring
+                </a>
+            </li>
+            <li class="">
+                <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200 w-full font-body-md text-body-md"
+                    href="#">
+                    <span class="material-symbols-outlined"
+                        style="font-variation-settings: 'FILL' 0;">directions_bus</span>
+                    Bus Management
+                </a>
+            </li>
+            <li class="">
+                <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200 w-full font-body-md text-body-md"
+                    href="#">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">route</span>
+                    Route Management
+                </a>
+            </li>
+            <li class="">
+                <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200 w-full font-body-md text-body-md"
+                    href="#">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">schedule</span>
+                    Schedule &amp; Timings
+                </a>
+            </li>
+            <li class="">
+                <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200 w-full font-body-md text-body-md"
+                    href="#">
+                    <span class="material-symbols-outlined"
+                        style="font-variation-settings: 'FILL' 0;">local_parking</span>
+                    Parking Bay Management
+                </a>
+            </li>
+            <li class="">
+                <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200 w-full font-body-md text-body-md"
+                    href="#">
+                    <span class="material-symbols-outlined"
+                        style="font-variation-settings: 'FILL' 0;">linked_camera</span>
+                    ANPR Records
+                </a>
+            </li>
+            <li class="">
+                <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200 w-full font-body-md text-body-md"
+                    href="#">
+                    <span class="material-symbols-outlined"
+                        style="font-variation-settings: 'FILL' 0;">notifications_active</span>
+                    Alerts &amp; Notifications
+                </a>
+            </li>
+            <li class="">
+                <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200 w-full font-body-md text-body-md"
+                    href="#">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">analytics</span>
+                    Reports &amp; Analytics
+                </a>
+            </li>
+            <li class="">
+                <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200 w-full font-body-md text-body-md"
+                    href="#">
+                    <span class="material-symbols-outlined"
+                        style="font-variation-settings: 'FILL' 0;">health_and_safety</span>
+                    System Health
+                </a>
+            </li>
+            <li class="">
+                <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200 w-full font-body-md text-body-md"
+                    href="#">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">history</span>
+                    Activity Logs
+                </a>
+            </li>
+            <li class="">
+                <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200 w-full font-body-md text-body-md"
+                    href="#">
+                    <span class="material-symbols-outlined"
+                        style="font-variation-settings: 'FILL' 0;">settings_backup_restore</span>
+                    Backup &amp; Restore
+                </a>
+            </li>
+            <li class="">
+                <a class="flex items-center gap-md px-md py-sm rounded-lg text-on-surface-variant hover:bg-secondary-container/50 transition-colors duration-200 w-full font-body-md text-body-md mb-lg"
+                    href="#">
+                    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+                    Settings
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <!-- Main Content Wrapper -->
+    <div class="flex-grow md:ml-[280px] flex flex-col min-h-screen">
+        <!-- TopNavBar -->
+        <header
+            class="bg-surface-container-lowest border-b border-outline-variant fixed top-0 right-0 w-full md:w-[calc(100%-280px)] h-16 flex items-center justify-between px-lg z-40 transition-all duration-200">
+            <div class="flex items-center gap-md md:hidden">
+                <span class="material-symbols-outlined text-on-surface cursor-pointer">menu</span>
+            </div>
+            <div class="flex-grow flex justify-end items-center gap-md">
+                <button
+                    class="p-sm rounded-full text-on-surface-variant hover:bg-surface-variant hover:text-primary transition-colors flex items-center justify-center">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <div class="flex items-center gap-sm border-l border-outline-variant pl-md ml-sm cursor-pointer">
+                    <div
+                        class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-label-md">
+                        A
+                    </div>
+                    <span class="font-body-md text-body-md text-on-surface font-semibold hidden md:block">Admin</span>
+                </div>
+            </div>
+        </header>
+        <!-- Canvas -->
+        <main class="flex-grow p-lg md:p-xl mt-16 mb-8 w-full max-w-7xl mx-auto">
+            <div class="mb-lg">
+                <h2 class="font-headline-lg text-headline-lg text-on-surface mb-xs">Live Monitoring</h2>
+                <p class="font-body-md text-body-md text-on-surface-variant">Real-time CCTV monitoring and AI-based bus
+                    detection</p>
+            </div>
+            <!-- Grid -->
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-lg">
+                <!-- Card 1 -->
+                <div
+                    class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-[0px_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0px_12px_24px_rgba(0,0,0,0.08)] transition-shadow duration-300 flex flex-col relative group">
+                    <div class="flex justify-between items-center p-md border-b border-outline-variant bg-surface">
+                        <div class="flex items-center gap-sm">
+                            <h3 class="font-headline-md text-headline-md text-on-surface">CAM 01</h3>
+                            <span
+                                class="font-label-md text-label-md text-on-surface-variant px-sm py-xs bg-surface-container rounded-full">Main
+                                Entrance</span>
+                        </div>
+                        <div
+                            class="flex items-center gap-xs text-[10px] uppercase font-bold tracking-wider px-sm py-xs bg-green-50 text-green-700 rounded-full border border-green-200">
+                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            LIVE
+                        </div>
+                    </div>
+                    <div class="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
+                        <div class="absolute inset-0 bg-cover bg-center opacity-80"
+                            data-alt="A high-angle view of a modern bus stand main entrance. A blue city bus is entering. Bright daylight. High definition CCTV footage aesthetic. Bounding boxes highlight the bus."
+                            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAFuNhQ8Ls35srhtb9QJUWG46y7FxEglcMPUskhF2SZJsqTf12BGuAczFKzu0vtb1nxU6tC2cIwF_ZSThljai7kWbnnFLiW0dFi0DM9Ww7VODM6h7YBVGbzMZLSCs_Lh-tq5pNnuJ6GxDS8puzdZe2Qelja_jfClBXCbdaFzm1xzJb8NDymNnfFoaz7pECVYtyrcmS53bdz8MwicaoRec24IGPI6w7Fix8CJFXo91_O0bp2TaNF_3LlfA')">
+                        </div>
+                        <!-- Mock AI Overlay -->
+                        <div
+                            class="absolute top-1/4 left-1/4 w-1/3 h-1/3 border-2 border-primary border-dashed rounded-sm bg-primary/10 flex flex-col justify-between p-xs pointer-events-none">
+                            <div class="bg-primary text-on-primary font-data-mono text-xs px-1 self-start inline-block">
+                                BUS: AB-1234</div>
+                            <div
+                                class="bg-primary text-on-primary font-data-mono text-[10px] px-1 self-end inline-block">
+                                CONF: 98%</div>
+                        </div>
+                        <!-- Telemetry -->
+                        <div
+                            class="absolute bottom-sm left-sm bg-black/60 backdrop-blur-sm px-sm py-xs rounded text-white font-data-mono text-xs flex gap-md">
+                            <span class="">FPS: 28</span>
+                            <span class="">LAT: 42ms</span>
+                        </div>
+                    </div>
+                    <div class="p-md flex justify-between items-center bg-surface-container-lowest">
+                        <div class="flex gap-sm">
+                            <button
+                                class="w-8 h-8 rounded bg-surface-variant text-on-surface hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center"
+                                title="Full Screen">
+                                <span class="material-symbols-outlined text-[20px]">fullscreen</span>
+                            </button>
+                            <button
+                                class="w-8 h-8 rounded bg-surface-variant text-on-surface hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center"
+                                title="Snapshot">
+                                <span class="material-symbols-outlined text-[20px]">photo_camera</span>
+                            </button>
+                        </div>
+                        <div class="flex gap-sm">
+                            <button
+                                class="px-md py-sm rounded font-label-md text-primary border border-primary hover:bg-primary-container hover:text-on-primary-container transition-colors">Details</button>
+                            <button
+                                class="p-sm rounded text-on-surface-variant hover:bg-surface-variant transition-colors flex items-center justify-center"
+                                title="Settings">
+                                <span class="material-symbols-outlined">settings</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div
+                    class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-[0px_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0px_12px_24px_rgba(0,0,0,0.08)] transition-shadow duration-300 flex flex-col relative group">
+                    <div class="flex justify-between items-center p-md border-b border-outline-variant bg-surface">
+                        <div class="flex items-center gap-sm">
+                            <h3 class="font-headline-md text-headline-md text-on-surface">CAM 02</h3>
+                            <span
+                                class="font-label-md text-label-md text-on-surface-variant px-sm py-xs bg-surface-container rounded-full">Bay
+                                Area A</span>
+                        </div>
+                        <div
+                            class="flex items-center gap-xs text-[10px] uppercase font-bold tracking-wider px-sm py-xs bg-green-50 text-green-700 rounded-full border border-green-200">
+                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            LIVE
+                        </div>
+                    </div>
+                    <div class="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
+                        <div class="absolute inset-0 bg-cover bg-center opacity-80"
+                            data-alt="A wide shot of bus bay A in a modern transit terminal. Two buses parked. Clear sunny day. CCTV style view. AI detection boxes overlayed."
+                            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAocDfvrGO9xB7VIoXc_FOTDHQgl-yAgOh9nNow1whrFl8pGLuqjjrfIAgjBDYenImDtSYOt9CkQ2Y04tx-HxineY8e_xvP7YNi_b_8Rs_Kv6d8Lvl3TeAu_HwLIqXX4qF9kt0WRokiA9fTQxCt4MaslzE3CQvXyKbVVwFHIvfN6kI4DL7vgV_dJl3yqEjDYsvx4ko07tI72ek4yXDwp1e0FEBoARYbiNEWSBqBpoR3nzSAGnp2Vk6NGw')">
+                        </div>
+                        <div
+                            class="absolute bottom-sm left-sm bg-black/60 backdrop-blur-sm px-sm py-xs rounded text-white font-data-mono text-xs flex gap-md">
+                            <span class="">FPS: 30</span>
+                            <span class="">LAT: 38ms</span>
+                        </div>
+                    </div>
+                    <div class="p-md flex justify-between items-center bg-surface-container-lowest">
+                        <div class="flex gap-sm">
+                            <button
+                                class="w-8 h-8 rounded bg-surface-variant text-on-surface hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center"
+                                title="Full Screen">
+                                <span class="material-symbols-outlined text-[20px]">fullscreen</span>
+                            </button>
+                            <button
+                                class="w-8 h-8 rounded bg-surface-variant text-on-surface hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center"
+                                title="Snapshot">
+                                <span class="material-symbols-outlined text-[20px]">photo_camera</span>
+                            </button>
+                        </div>
+                        <div class="flex gap-sm">
+                            <button
+                                class="px-md py-sm rounded font-label-md text-primary border border-primary hover:bg-primary-container hover:text-on-primary-container transition-colors">Details</button>
+                            <button
+                                class="p-sm rounded text-on-surface-variant hover:bg-surface-variant transition-colors flex items-center justify-center"
+                                title="Settings">
+                                <span class="material-symbols-outlined">settings</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 3 -->
+                <div
+                    class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-[0px_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0px_12px_24px_rgba(0,0,0,0.08)] transition-shadow duration-300 flex flex-col relative group">
+                    <div class="flex justify-between items-center p-md border-b border-outline-variant bg-surface">
+                        <div class="flex items-center gap-sm">
+                            <h3 class="font-headline-md text-headline-md text-on-surface">CAM 03</h3>
+                            <span
+                                class="font-label-md text-label-md text-on-surface-variant px-sm py-xs bg-surface-container rounded-full">Bay
+                                Area B</span>
+                        </div>
+                        <div
+                            class="flex items-center gap-xs text-[10px] uppercase font-bold tracking-wider px-sm py-xs bg-green-50 text-green-700 rounded-full border border-green-200">
+                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            LIVE
+                        </div>
+                    </div>
+                    <div class="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
+                        <div class="absolute inset-0 bg-cover bg-center opacity-80"
+                            data-alt="Empty bus bay B waiting area. Clean, modern architecture. Bright daylight. CCTV camera aesthetic."
+                            style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCXHBoJkPoLu3MeOUmxiwczXp18XufK8oHE4MniOCrmWbgh4lFRriYynpXHUKOYo5pEwUinu9Gy97uACnPSZw7G7IPypoZKebNP3zckHSMQAoQeowwrCzVcPuqzbvy0srzam-eQ5zhg-jU1MUWFX_r3oH2xP1ffdVkSS-1okdk1I31a73Oxxlv3BWQ4QAqALcJkT9xs3blQ6Mg43XjdnRnLEk4a03SzVElfaHS7_RCGPk9u7XMQLTMzgg')">
+                        </div>
+                        <div
+                            class="absolute bottom-sm left-sm bg-black/60 backdrop-blur-sm px-sm py-xs rounded text-white font-data-mono text-xs flex gap-md">
+                            <span class="">FPS: 28</span>
+                            <span class="">LAT: 45ms</span>
+                        </div>
+                    </div>
+                    <div class="p-md flex justify-between items-center bg-surface-container-lowest">
+                        <div class="flex gap-sm">
+                            <button
+                                class="w-8 h-8 rounded bg-surface-variant text-on-surface hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center"
+                                title="Full Screen">
+                                <span class="material-symbols-outlined text-[20px]">fullscreen</span>
+                            </button>
+                            <button
+                                class="w-8 h-8 rounded bg-surface-variant text-on-surface hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center"
+                                title="Snapshot">
+                                <span class="material-symbols-outlined text-[20px]">photo_camera</span>
+                            </button>
+                        </div>
+                        <div class="flex gap-sm">
+                            <button
+                                class="px-md py-sm rounded font-label-md text-primary border border-primary hover:bg-primary-container hover:text-on-primary-container transition-colors">Details</button>
+                            <button
+                                class="p-sm rounded text-on-surface-variant hover:bg-surface-variant transition-colors flex items-center justify-center"
+                                title="Settings">
+                                <span class="material-symbols-outlined">settings</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 4 (Offline) -->
+                <div
+                    class="bg-surface-container-lowest border border-error-container rounded-xl overflow-hidden shadow-[0px_4px_12px_rgba(0,0,0,0.05)] flex flex-col relative">
+                    <div
+                        class="flex justify-between items-center p-md border-b border-error-container bg-error-container/20">
+                        <div class="flex items-center gap-sm">
+                            <h3 class="font-headline-md text-headline-md text-on-surface">CAM 04</h3>
+                            <span
+                                class="font-label-md text-label-md text-on-surface-variant px-sm py-xs bg-surface-container rounded-full">Exit
+                                Gate</span>
+                        </div>
+                        <div
+                            class="flex items-center gap-xs text-[10px] uppercase font-bold tracking-wider px-sm py-xs bg-red-50 text-error rounded-full border border-red-200">
+                            <span class="material-symbols-outlined text-[14px]">videocam_off</span>
+                            OFFLINE
+                        </div>
+                    </div>
+                    <div
+                        class="relative w-full aspect-video bg-inverse-surface flex flex-col items-center justify-center">
+                        <span class="material-symbols-outlined text-outline-variant text-[48px] mb-md">cloud_off</span>
+                        <p class="font-body-md text-body-md text-outline-variant text-center px-lg">Connection lost to
+                            camera stream.<br>Last seen 14 mins ago.</p>
+                    </div>
+                    <div
+                        class="p-md flex justify-end items-center bg-surface-container-lowest border-t border-outline-variant">
+                        <div class="flex gap-sm">
+                            <button
+                                class="px-md py-sm rounded font-label-md text-on-surface-variant bg-surface-variant hover:bg-surface-container-highest transition-colors">Diagnose</button>
+                            <button
+                                class="px-md py-sm rounded font-label-md text-white bg-error hover:bg-on-error-container transition-colors flex items-center gap-xs">
+                                <span class="material-symbols-outlined text-[16px]">refresh</span>
+                                Restart Stream
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!-- Footer -->
+        <footer
+            class="bg-surface-container-low border-t border-outline-variant fixed bottom-0 right-0 w-full md:w-[calc(100%-280px)] h-8 flex items-center justify-between px-md opacity-90 z-40">
+            <div class="font-label-md text-label-md text-on-surface">System Uptime: 99.9% | AI Engine: YOLOv11 Active |
+                DB: Connected</div>
+            <div class="flex gap-md">
+                <a class="font-label-md text-label-md text-on-surface-variant hover:underline" href="#">Status</a>
+                <a class="font-label-md text-label-md text-on-surface-variant hover:underline" href="#">Help Desk</a>
+                <a class="font-label-md text-label-md text-on-surface-variant hover:underline" href="#">Security</a>
+            </div>
+        </footer>
+    </div>
+
+
+</body>
+
+</html>

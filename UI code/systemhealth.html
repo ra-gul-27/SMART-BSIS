@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Smart Bus Stand - System Health</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#fefcff",
+                        "secondary-fixed-dim": "#c0c7cf",
+                        "outline": "#727785",
+                        "tertiary-container": "#b75b00",
+                        "inverse-primary": "#adc6ff",
+                        "secondary-container": "#dce3eb",
+                        "on-primary-fixed-variant": "#004395",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "on-background": "#0b1c30",
+                        "on-tertiary-fixed": "#311400",
+                        "background": "#f8f9ff",
+                        "surface": "#f8f9ff",
+                        "surface-container-low": "#eff4ff",
+                        "on-surface": "#0b1c30",
+                        "on-secondary-fixed-variant": "#40484e",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#d3e4fe",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#d8e2ff",
+                        "surface-bright": "#f8f9ff",
+                        "on-primary-fixed": "#001a42",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "primary-container": "#2170e4",
+                        "primary": "#0058be",
+                        "surface-container-highest": "#d3e4fe",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-secondary-fixed": "#151c22",
+                        "surface-container-high": "#dce9ff",
+                        "outline-variant": "#c2c6d6",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-secondary-container": "#5e656c",
+                        "inverse-surface": "#213145",
+                        "tertiary": "#924700",
+                        "secondary-fixed": "#dce3eb",
+                        "surface-container": "#e5eeff",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#424754",
+                        "secondary": "#585f66",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#cbdbf5",
+                        "surface-tint": "#005ac2"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "xl": "32px",
+                        "container-margin": "24px",
+                        "base": "8px",
+                        "md": "16px",
+                        "sm": "8px",
+                        "xs": "4px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": [
+                            "Inter"
+                        ],
+                        "headline-lg": [
+                            "Inter"
+                        ],
+                        "body-lg": [
+                            "Inter"
+                        ],
+                        "label-md": [
+                            "Inter"
+                        ],
+                        "data-mono": [
+                            "Inter"
+                        ],
+                        "display": [
+                            "Inter"
+                        ],
+                        "body-md": [
+                            "Inter"
+                        ]
+                    },
+                    "fontSize": {
+                        "headline-md": [
+                            "20px",
+                            {
+                                "lineHeight": "28px",
+                                "fontWeight": "600"
+                            }
+                        ],
+                        "headline-lg": [
+                            "28px",
+                            {
+                                "lineHeight": "36px",
+                                "fontWeight": "600"
+                            }
+                        ],
+                        "body-lg": [
+                            "16px",
+                            {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                            }
+                        ],
+                        "label-md": [
+                            "12px",
+                            {
+                                "lineHeight": "16px",
+                                "letterSpacing": "0.05em",
+                                "fontWeight": "600"
+                            }
+                        ],
+                        "data-mono": [
+                            "14px",
+                            {
+                                "lineHeight": "20px",
+                                "letterSpacing": "-0.01em",
+                                "fontWeight": "500"
+                            }
+                        ],
+                        "display": [
+                            "36px",
+                            {
+                                "lineHeight": "44px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                            }
+                        ],
+                        "body-md": [
+                            "14px",
+                            {
+                                "lineHeight": "20px",
+                                "fontWeight": "400"
+                            }
+                        ]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background text-on-background min-h-screen font-body-md text-body-md overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+    <!-- TopNavBar -->
+    <header
+        class="fixed top-0 right-0 w-full md:w-[calc(100%-280px)] h-16 bg-surface-container-lowest dark:bg-surface-container-lowest border-b border-outline-variant dark:border-outline flat no shadows flex items-center justify-between px-lg z-50 transition-all duration-200">
+        <div class="flex items-center gap-md">
+            <span class="material-symbols-outlined md:hidden cursor-pointer" id="mobileMenuBtn">menu</span>
+            <div class="font-headline-md text-headline-md font-bold text-on-surface dark:text-on-surface">Smart Bus
+                Stand</div>
+        </div>
+        <div class="flex items-center gap-md">
+            <button aria-label="notifications"
+                class="p-2 hover:bg-surface-container-highest rounded-full transition-colors text-on-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim">
+                <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+            </button>
+            <div class="flex items-center gap-sm cursor-pointer group">
+                <div
+                    class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-label-md overflow-hidden">
+                    <img alt="Super Administrator Avatar" class="w-full h-full object-cover"
+                        data-alt="A small, professional portrait photograph of an administrative user, shown from the shoulders up against a clean, neutral background. The lighting is soft and even, typical of a corporate headshot. The color palette aligns with a modern, high-tech interface, using crisp whites and subtle blues to match a light-mode enterprise environment. The image is cropped tightly to function as a tiny, circular avatar icon."
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2ttLc0gCeWoR3JBwK6IsCiqGbpq-SU3BIq6wkkiL5CSOfd_O0gOHAHGoyl6npregezNb9B0L7MIIwtN-xKg1KvLmmZSd0jPkVZRxifMjuBOWgIASAxw4lKstX5hpOgdO43VKwq9rvS_sQcic7frjboHkQcTzyRkrEJxqQBuMVA0zcsrdWwbubfagQ1T4DA18rJ6qdFpQzLGBeunSRFP2cZA4zzpIEsmnfb7M-QAT9ySmg2RuWacsh_Q">
+                </div>
+                <span
+                    class="font-label-md text-label-md text-on-surface group-hover:text-primary transition-colors hidden sm:inline-block">Admin</span>
+            </div>
+        </div>
+    </header>
+    <!-- SideNavBar -->
+    <nav class="fixed left-0 top-0 h-screen w-[280px] bg-surface-bright dark:bg-surface-dim border-r border-outline-variant dark:border-outline flat no shadows flex flex-col p-md z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300"
+        id="sidebar">
+        <div class="flex items-center gap-sm mb-lg px-2">
+            <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-on-primary shadow-sm">
+                <span class="material-symbols-outlined">directions_bus</span>
+            </div>
+            <div>
+                <h1
+                    class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim leading-tight">
+                    Smart Bus Stand</h1>
+                <p class="font-label-md text-label-md text-on-surface-variant opacity-80">Management Portal</p>
+            </div>
+        </div>
+        <div class="flex-1 overflow-y-auto pr-2 space-y-1"><a
+                class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200 font-label-md text-label-md"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+            <a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200 font-label-md text-label-md"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="videocam">videocam</span>
+                Live Monitoring
+            </a>
+            <a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200 font-label-md text-label-md"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="directions_bus">directions_bus</span>
+                Bus Management
+            </a>
+            <a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200 font-label-md text-label-md"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="route">route</span>
+                Route Management
+            </a>
+            <a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200 font-label-md text-label-md"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="schedule">schedule</span>
+                Schedule &amp; Timings
+            </a>
+            <a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200 font-label-md text-label-md"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="local_parking">local_parking</span>
+                Parking Bay Management
+            </a>
+            <a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200 font-label-md text-label-md"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="linked_camera">linked_camera</span>
+                ANPR Records
+            </a>
+            <a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200 font-label-md text-label-md"
+                href="#">
+                <span class="material-symbols-outlined text-lg"
+                    data-icon="notifications_active">notifications_active</span>
+                Alerts &amp; Notifications
+            </a>
+            <a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200 font-label-md text-label-md"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="analytics">analytics</span>
+                Reports &amp; Analytics
+            </a>
+            <a class="flex items-center gap-md px-3 py-2 text-primary dark:text-primary-fixed-dim font-bold bg-secondary-container dark:bg-secondary-fixed-dim rounded-lg transition-colors duration-200 font-label-md text-label-md"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="health_and_safety"
+                    data-weight="fill">health_and_safety</span>
+                System Health
+            </a>
+            <a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200 font-label-md text-label-md"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="history">history</span>
+                Activity Logs
+            </a>
+            <a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200 font-label-md text-label-md"
+                href="#">
+                <span class="material-symbols-outlined text-lg"
+                    data-icon="settings_backup_restore">settings_backup_restore</span>
+                Backup &amp; Restore
+            </a>
+            <a class="flex items-center gap-md px-3 py-2 rounded-lg text-on-surface-variant dark:text-on-secondary-fixed-variant hover:bg-secondary-container/50 dark:hover:bg-secondary-fixed-dim/20 transition-colors duration-200 font-label-md text-label-md"
+                href="#">
+                <span class="material-symbols-outlined text-lg" data-icon="settings">settings</span>
+                Settings
+            </a>
+        </div>
+    </nav>
+    <div class="fixed inset-0 bg-on-background/50 z-30 hidden md:hidden" id="sidebarOverlay"></div>
+    <!-- Main Content -->
+    <main class="md:ml-[280px] pt-16 pb-8 min-h-screen flex flex-col">
+        <div class="flex-1 p-lg max-w-7xl mx-auto w-full space-y-lg">
+            <!-- Page Header -->
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-md">
+                <div>
+                    <h2 class="font-headline-lg text-headline-lg text-on-background">System Health Monitor</h2>
+                    <p class="font-body-md text-body-md text-on-surface-variant mt-1">Real-time status of critical
+                        transit infrastructure components.</p>
+                </div>
+                <div
+                    class="flex items-center gap-sm bg-surface-container px-3 py-2 rounded-lg border border-outline-variant shadow-sm">
+                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="font-data-mono text-data-mono text-on-surface">All Systems Operational</span>
+                </div>
+            </div>
+            <!-- Top Core Services Status (Bento-style Grid) -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-md">
+                <!-- Card 1 -->
+                <div
+                    class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-[0px_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0px_12px_24px_rgba(0,0,0,0.08)] transition-shadow duration-200 flex flex-col relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-2 opacity-10 text-primary pointer-events-none">
+                        <span class="material-symbols-outlined text-5xl">videocam</span>
+                    </div>
+                    <div class="flex items-center justify-between mb-sm relative z-10">
+                        <span class="font-label-md text-label-md text-on-surface-variant">CCTV Cameras</span>
+                        <span class="material-symbols-outlined text-green-600 text-sm">check_circle</span>
+                    </div>
+                    <div class="font-headline-md text-headline-md text-on-surface relative z-10">6/6 Online</div>
+                    <div class="mt-auto pt-2">
+                        <div class="w-full bg-surface-variant h-1 rounded-full overflow-hidden">
+                            <div class="bg-green-500 h-full w-full"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div
+                    class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-[0px_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0px_12px_24px_rgba(0,0,0,0.08)] transition-shadow duration-200 flex flex-col relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 opacity-10 text-primary pointer-events-none">
+                        <span class="material-symbols-outlined text-5xl">visibility</span>
+                    </div>
+                    <div class="flex items-center justify-between mb-sm relative z-10">
+                        <span class="font-label-md text-label-md text-on-surface-variant">YOLOv11 Engine</span>
+                        <span
+                            class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wider border border-green-200">ACTIVE</span>
+                    </div>
+                    <div class="font-headline-md text-headline-md text-on-surface relative z-10">Inference OK</div>
+                    <div class="mt-auto pt-2 flex items-center gap-1 text-xs text-on-surface-variant">
+                        <span class="material-symbols-outlined text-[14px]">bolt</span> 42ms avg latency
+                    </div>
+                </div>
+                <!-- Card 3 -->
+                <div
+                    class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-[0px_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0px_12px_24px_rgba(0,0,0,0.08)] transition-shadow duration-200 flex flex-col relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 opacity-10 text-primary pointer-events-none">
+                        <span class="material-symbols-outlined text-5xl">directions_car</span>
+                    </div>
+                    <div class="flex items-center justify-between mb-sm relative z-10">
+                        <span class="font-label-md text-label-md text-on-surface-variant">ANPR Service</span>
+                        <span
+                            class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wider border border-green-200">ACTIVE</span>
+                    </div>
+                    <div class="font-headline-md text-headline-md text-on-surface relative z-10">Processing</div>
+                    <div class="mt-auto pt-2 flex items-center gap-1 text-xs text-on-surface-variant">
+                        <span class="material-symbols-outlined text-[14px]">speed</span> 120 plates/min
+                    </div>
+                </div>
+                <!-- Card 4 -->
+                <div
+                    class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-[0px_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0px_12px_24px_rgba(0,0,0,0.08)] transition-shadow duration-200 flex flex-col relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 opacity-10 text-primary pointer-events-none">
+                        <span class="material-symbols-outlined text-5xl">memory</span>
+                    </div>
+                    <div class="flex items-center justify-between mb-sm relative z-10">
+                        <span class="font-label-md text-label-md text-on-surface-variant">OpenCV Stream</span>
+                        <span
+                            class="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wider border border-green-200">RUNNING</span>
+                    </div>
+                    <div class="font-headline-md text-headline-md text-on-surface relative z-10">Stable</div>
+                    <div class="mt-auto pt-2 flex items-center gap-1 text-xs text-on-surface-variant">
+                        <span class="material-symbols-outlined text-[14px]">sync</span> 30 FPS target met
+                    </div>
+                </div>
+                <!-- Card 5 -->
+                <div
+                    class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-[0px_4px_12px_rgba(0,0,0,0.05)] hover:shadow-[0px_12px_24px_rgba(0,0,0,0.08)] transition-shadow duration-200 flex flex-col relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-2 opacity-10 text-primary pointer-events-none">
+                        <span class="material-symbols-outlined text-5xl">database</span>
+                    </div>
+                    <div class="flex items-center justify-between mb-sm relative z-10">
+                        <span class="font-label-md text-label-md text-on-surface-variant">PostgreSQL DB</span>
+                        <span
+                            class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wider border border-blue-200">CONNECTED</span>
+                    </div>
+                    <div class="font-headline-md text-headline-md text-on-surface relative z-10">Synced</div>
+                    <div class="mt-auto pt-2 flex items-center gap-1 text-xs text-on-surface-variant">
+                        <span class="material-symbols-outlined text-[14px]">update</span> Last updated just now
+                    </div>
+                </div>
+            </div>
+            <!-- Technical Monitoring (Hardware) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-md">
+                <!-- CPU/GPU Gauges -->
+                <div
+                    class="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-[0px_4px_12px_rgba(0,0,0,0.05)]">
+                    <h3 class="font-label-md text-label-md text-on-surface-variant mb-md flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">memory</span> Hardware Utilization
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-lg h-48">
+                        <!-- CPU -->
+                        <div class="flex flex-col items-center justify-center relative">
+                            <!-- Faux Circular Gauge -->
+                            <svg class="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-surface-variant"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    fill="none" stroke="currentColor" stroke-width="3"></path>
+                                <path class="text-primary"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    fill="none" stroke="currentColor" stroke-dasharray="45, 100" stroke-width="3">
+                                </path>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <span class="font-headline-lg text-headline-lg text-on-surface">45%</span>
+                                <span class="font-label-md text-label-md text-on-surface-variant">CPU</span>
+                            </div>
+                        </div>
+                        <!-- GPU -->
+                        <div class="flex flex-col items-center justify-center relative">
+                            <svg class="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-surface-variant"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    fill="none" stroke="currentColor" stroke-width="3"></path>
+                                <path class="text-amber-500"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    fill="none" stroke="currentColor" stroke-dasharray="78, 100" stroke-width="3">
+                                </path>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <span class="font-headline-lg text-headline-lg text-amber-600">78%</span>
+                                <span class="font-label-md text-label-md text-on-surface-variant">GPU</span>
+                            </div>
+                        </div>
+                        <!-- Memory -->
+                        <div class="flex flex-col items-center justify-center relative">
+                            <svg class="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-surface-variant"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    fill="none" stroke="currentColor" stroke-width="3"></path>
+                                <path class="text-primary"
+                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    fill="none" stroke="currentColor" stroke-dasharray="62, 100" stroke-width="3">
+                                </path>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <span class="font-headline-lg text-headline-lg text-on-surface">62%</span>
+                                <span class="font-label-md text-label-md text-on-surface-variant">RAM</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- API & Latency Stats -->
+                <div
+                    class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-[0px_4px_12px_rgba(0,0,0,0.05)] flex flex-col">
+                    <h3 class="font-label-md text-label-md text-on-surface-variant mb-md flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">network_check</span> Network &amp; Latency
+                    </h3>
+                    <div class="space-y-4 flex-1">
+                        <div>
+                            <div class="flex justify-between items-end mb-1">
+                                <span class="font-label-md text-label-md text-on-surface">API Response Time</span>
+                                <span class="font-data-mono text-data-mono text-on-surface">120ms</span>
+                            </div>
+                            <div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+                                <div class="bg-primary h-full w-1/4 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-end mb-1">
+                                <span class="font-label-md text-label-md text-on-surface">Inference Latency</span>
+                                <span class="font-data-mono text-data-mono text-amber-600">42ms</span>
+                            </div>
+                            <div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+                                <div class="bg-amber-500 h-full w-2/5 rounded-full"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-end mb-1">
+                                <span class="font-label-md text-label-md text-on-surface">Global FPS Avg</span>
+                                <span class="font-data-mono text-data-mono text-on-surface">29.5</span>
+                            </div>
+                            <div class="w-full bg-surface-variant h-2 rounded-full overflow-hidden">
+                                <div class="bg-green-500 h-full w-[95%] rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-outline-variant">
+                        <div class="flex items-center gap-2 text-xs text-on-surface-variant">
+                            <span class="material-symbols-outlined text-[14px]">router</span> Primary Network Interface
+                            active.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Data Table: Camera Health -->
+            <div
+                class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-[0px_4px_12px_rgba(0,0,0,0.05)] overflow-hidden">
+                <div
+                    class="p-md border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+                    <h3 class="font-headline-md text-headline-md text-on-surface">Edge Device Node Status</h3>
+                    <button
+                        class="flex items-center gap-1 text-primary hover:bg-primary-container/20 px-3 py-1.5 rounded transition-colors font-label-md">
+                        <span class="material-symbols-outlined text-[18px]">refresh</span> Refresh
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr
+                                class="bg-surface border-b border-outline-variant font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">
+                                <th class="p-3 pl-md">Location / ID</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3">FPS</th>
+                                <th class="p-3">Latency</th>
+                                <th class="p-3">Last Frame Recv</th>
+                                <th class="p-3 pr-md text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="font-data-mono text-data-mono text-on-surface">
+                            <tr
+                                class="border-b border-outline-variant/50 hover:bg-surface-container-lowest transition-colors h-[48px]">
+                                <td class="p-3 pl-md flex items-center gap-2">
+                                    <span
+                                        class="material-symbols-outlined text-surface-variant text-[18px]">videocam</span>
+                                    Bay 1 Entry (CAM-01)
+                                </td>
+                                <td class="p-3">
+                                    <span
+                                        class="inline-flex items-center gap-1 text-green-700 bg-green-50 px-2 py-0.5 rounded-full text-xs font-bold border border-green-200">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div> Operational
+                                    </span>
+                                </td>
+                                <td class="p-3">30.0</td>
+                                <td class="p-3">38ms</td>
+                                <td class="p-3 text-on-surface-variant text-xs">2s ago</td>
+                                <td class="p-3 pr-md text-right">
+                                    <button class="text-on-surface-variant hover:text-primary transition-colors"><span
+                                            class="material-symbols-outlined text-[18px]">more_vert</span></button>
+                                </td>
+                            </tr>
+                            <tr
+                                class="border-b border-outline-variant/50 bg-surface hover:bg-surface-container-lowest transition-colors h-[48px]">
+                                <td class="p-3 pl-md flex items-center gap-2">
+                                    <span
+                                        class="material-symbols-outlined text-surface-variant text-[18px]">videocam</span>
+                                    Bay 2 Exit (CAM-02)
+                                </td>
+                                <td class="p-3">
+                                    <span
+                                        class="inline-flex items-center gap-1 text-green-700 bg-green-50 px-2 py-0.5 rounded-full text-xs font-bold border border-green-200">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div> Operational
+                                    </span>
+                                </td>
+                                <td class="p-3">29.8</td>
+                                <td class="p-3">41ms</td>
+                                <td class="p-3 text-on-surface-variant text-xs">1s ago</td>
+                                <td class="p-3 pr-md text-right">
+                                    <button class="text-on-surface-variant hover:text-primary transition-colors"><span
+                                            class="material-symbols-outlined text-[18px]">more_vert</span></button>
+                                </td>
+                            </tr>
+                            <tr
+                                class="border-b border-outline-variant/50 hover:bg-surface-container-lowest transition-colors h-[48px]">
+                                <td class="p-3 pl-md flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-amber-500 text-[18px]">videocam</span>
+                                    Passenger Area A (CAM-03)
+                                </td>
+                                <td class="p-3">
+                                    <span
+                                        class="inline-flex items-center gap-1 text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full text-xs font-bold border border-amber-200">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-amber-500"></div> Warning
+                                    </span>
+                                </td>
+                                <td class="p-3 text-amber-600">22.4 <span
+                                        class="text-[10px] material-symbols-outlined align-middle">arrow_downward</span>
+                                </td>
+                                <td class="p-3 text-amber-600">85ms</td>
+                                <td class="p-3 text-on-surface-variant text-xs">4s ago</td>
+                                <td class="p-3 pr-md text-right">
+                                    <button class="text-on-surface-variant hover:text-primary transition-colors"><span
+                                            class="material-symbols-outlined text-[18px]">more_vert</span></button>
+                                </td>
+                            </tr>
+                            <tr
+                                class="border-b border-outline-variant/50 bg-surface hover:bg-surface-container-lowest transition-colors h-[48px]">
+                                <td class="p-3 pl-md flex items-center gap-2">
+                                    <span
+                                        class="material-symbols-outlined text-surface-variant text-[18px]">videocam</span>
+                                    Ticketing Zone (CAM-04)
+                                </td>
+                                <td class="p-3">
+                                    <span
+                                        class="inline-flex items-center gap-1 text-green-700 bg-green-50 px-2 py-0.5 rounded-full text-xs font-bold border border-green-200">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div> Operational
+                                    </span>
+                                </td>
+                                <td class="p-3">30.0</td>
+                                <td class="p-3">39ms</td>
+                                <td class="p-3 text-on-surface-variant text-xs">1s ago</td>
+                                <td class="p-3 pr-md text-right">
+                                    <button class="text-on-surface-variant hover:text-primary transition-colors"><span
+                                            class="material-symbols-outlined text-[18px]">more_vert</span></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Footer -->
+    <footer
+        class="fixed bottom-0 right-0 w-full md:w-[calc(100%-280px)] h-8 bg-surface-container-low dark:bg-surface-container-low border-t border-outline-variant dark:border-outline flat no shadows flex items-center justify-between px-md w-full z-40 opacity-90">
+        <div class="font-label-md text-label-md text-on-surface-variant dark:text-on-surface-variant">System Uptime:
+            99.9% | AI Engine: YOLOv11 Active | DB: Connected</div>
+        <div
+            class="flex items-center gap-md font-label-md text-label-md text-on-surface-variant dark:text-on-surface-variant">
+            <a class="hover:underline hover:text-primary dark:hover:text-primary-fixed-dim" href="#">Status</a>
+            <a class="hover:underline hover:text-primary dark:hover:text-primary-fixed-dim" href="#">Help Desk</a>
+            <a class="hover:underline hover:text-primary dark:hover:text-primary-fixed-dim" href="#">Security</a>
+        </div>
+    </footer>
+    <script>
+        // Simple mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function toggleMenu() {
+            const isClosed = sidebar.classList.contains('-translate-x-full');
+            if (isClosed) {
+                sidebar.classList.remove('-translate-x-full');
+                sidebarOverlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                sidebarOverlay.classList.add('hidden');
+            }
+        }
+
+        mobileMenuBtn.addEventListener('click', toggleMenu);
+        sidebarOverlay.addEventListener('click', toggleMenu);
+    </script>
+
+
+</body>
+
+</html>
