@@ -1,3 +1,4 @@
+import os
 import customtkinter as ctk
 from app.constants import COLORS, FONTS
 
@@ -36,13 +37,22 @@ class CameraCard(ctk.CTkFrame):
         # Video placeholder
         self.video_frame = ctk.CTkFrame(self, fg_color=COLORS["inverse_surface"], corner_radius=0)
         self.video_frame.pack(fill="both", expand=True, padx=1, pady=0)
+
+        # Show CCTV visual frame if live
+        if is_live and os.path.exists("test_detection_output.jpg"):
+            try:
+                from PIL import Image
+                img = Image.open("test_detection_output.jpg")
+                ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=(480, 260))
+                thumb = ctk.CTkLabel(self.video_frame, text="", image=ctk_img)
+                thumb.place(relx=0.5, rely=0.5, anchor="center")
+            except Exception:
+                pass
         
         # Telemetry inside video frame
         if is_live:
-            tele_frame = ctk.CTkFrame(self.video_frame, fg_color="#000000", corner_radius=4)
+            tele_frame = ctk.CTkFrame(self.video_frame, fg_color="#1c1c1c", corner_radius=4)
             tele_frame.pack(side="bottom", anchor="w", padx=12, pady=12)
-            # Simulated transparency
-            tele_frame.configure(fg_color="#1c1c1c")
             
             ctk.CTkLabel(tele_frame, text="FPS: 28", font=FONTS["data_mono"], text_color="#ffffff").pack(side="left", padx=8, pady=4)
             ctk.CTkLabel(tele_frame, text="LAT: 42ms", font=FONTS["data_mono"], text_color="#ffffff").pack(side="left", padx=(0, 8), pady=4)

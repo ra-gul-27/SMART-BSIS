@@ -47,6 +47,10 @@ venv.bak/
 *.pth
 *.onnx
 
+# Test output files
+test_detection_output.jpg
+real_bus_*.jpg
+
 # OS files
 Thumbs.db
 Desktop.ini
