@@ -30,16 +30,28 @@ class BusManagementView(ctk.CTkFrame):
         ctk.CTkLabel(left, text="Bus Management", font=FONTS["headline_lg"], text_color=COLORS["on_surface"]).pack(anchor="w")
         ctk.CTkLabel(left, text="Manage fleet, monitor status, and assign routes.", font=FONTS["body_md"], text_color=COLORS["on_surface_variant"]).pack(anchor="w")
 
-        right = ctk.CTkFrame(header, fg_color="transparent")
-        right.grid(row=0, column=1, sticky="e")
+        self.search_var = ctk.StringVar(value="")
+        self.status_filter_var = ctk.StringVar(value="All Status")
+
+        # Search Box
+        search_box = ctk.CTkEntry(
+            right, placeholder_text="🔍 Filter buses, drivers...", textvariable=self.search_var,
+            font=FONTS["body_md"], fg_color=COLORS["surface_container_lowest"], border_color=COLORS["outline_variant"], width=180, height=36
+        )
+        search_box.pack(side="left", padx=(0, 8))
+        search_box.bind("<KeyRelease>", lambda e: self._populate_grid())
+
+        # Status OptionMenu
+        status_menu = ctk.CTkOptionMenu(
+            right, values=["All Status", "Active", "Maintenance"], variable=self.status_filter_var,
+            font=FONTS["body_md"], fg_color=COLORS["surface_container_lowest"], text_color=COLORS["on_surface"],
+            button_color=COLORS["surface_container"], button_hover_color=COLORS["outline_variant"],
+            height=36, width=125, command=lambda e: self._populate_grid()
+        )
+        status_menu.pack(side="left", padx=(0, 10))
 
         ctk.CTkButton(
-            right, text="≡ Filter", font=FONTS["label_md"], 
-            fg_color=COLORS["surface_container"], text_color=COLORS["on_surface"], border_color=COLORS["outline_variant"], border_width=1, hover_color=COLORS["surface_variant"]
-        ).pack(side="left", padx=(0, 12))
-
-        ctk.CTkButton(
-            right, text="+ Add New Bus", font=FONTS["label_md"], 
+            right, text="+ Add New Bus", font=FONTS["label_md"], height=36,
             fg_color=COLORS["primary"], text_color=COLORS["on_primary"], hover_color=COLORS["primary_container"],
             command=self.open_drawer
         ).pack(side="left")
@@ -124,7 +136,9 @@ class BusManagementView(ctk.CTkFrame):
         for widget in self.grid_container.winfo_children():
             widget.destroy()
             
-        buses = BusModel.get_all_buses()
+        s_term = self.search_var.get().strip() if hasattr(self, "search_var") else None
+        st_filter = self.status_filter_var.get() if hasattr(self, "status_filter_var") else None
+        buses = BusModel.get_all_buses(search_term=s_term, status_filter=st_filter)
         if hasattr(self, "footer_count_lbl"):
             self.footer_count_lbl.configure(text=f"Showing 1 to {len(buses)} of {len(buses)} entries")
         
@@ -189,27 +203,50 @@ class BusManagementView(ctk.CTkFrame):
             ctk.CTkButton(
                 c7_wrapper, text="👁", width=30, height=30, 
                 fg_color="#e0eaf7", hover_color="#cbdff7", 
-                text_color="#0058be", corner_radius=6
+                text_color="#0058be", corner_radius=6,
+                command=lambda b=row: self._open_edit_drawer(b)
             ).pack(side="left", padx=2)
 
             # Edit Icon Button
             ctk.CTkButton(
                 c7_wrapper, text="✎", width=30, height=30, 
                 fg_color="#e0f2fe", hover_color="#bae6fd", 
-                text_color="#0284c7", corner_radius=6
+                text_color="#0284c7", corner_radius=6,
+                command=lambda b=row: self._open_edit_drawer(b)
             ).pack(side="left", padx=2)
 
             # Power/Status Toggle Button
             ctk.CTkButton(
                 c7_wrapper, text="⏻", width=30, height=30, 
                 fg_color="#fee2e2", hover_color="#fca5a5", 
-                text_color="#dc2626", corner_radius=6
+                text_color="#dc2626", corner_radius=6,
+                command=lambda reg=row['reg']: self._toggle_status(reg)
             ).pack(side="left", padx=2)
 
             # Horizontal divider line under every row (except last)
             if i < len(buses) - 1:
                 divider = ctk.CTkFrame(self.grid_container, fg_color="#cbd5e1", height=1)
                 divider.pack(fill="x", padx=2)
+
+    def _open_edit_drawer(self, bus_data):
+        self.drawer_title_label.configure(text=f"Edit Bus: {bus_data['reg']}")
+        self.entry_reg.delete(0, 'end')
+        self.entry_reg.insert(0, bus_data['reg'])
+        self.entry_type.delete(0, 'end')
+        self.entry_type.insert(0, bus_data['type'])
+        self.entry_cap.delete(0, 'end')
+        self.entry_cap.insert(0, bus_data['capacity'])
+        self.entry_status.delete(0, 'end')
+        self.entry_status.insert(0, bus_data['status'])
+        self.entry_driver.delete(0, 'end')
+        self.entry_driver.insert(0, bus_data['driver'] if bus_data['driver'] else "")
+        self.entry_maint.delete(0, 'end')
+        self.entry_maint.insert(0, bus_data['last_maintenance'] if bus_data['last_maintenance'] != '-' else "")
+        self.open_drawer()
+
+    def _toggle_status(self, reg):
+        BusModel.toggle_bus_status(reg)
+        self._populate_grid()
 
     def _build_drawer(self):
         # The drawer sits exactly on top of the right side.
@@ -223,7 +260,8 @@ class BusManagementView(ctk.CTkFrame):
         d_header.pack(fill="x")
         d_header.pack_propagate(False)
         
-        ctk.CTkLabel(d_header, text="Add New Bus", font=FONTS["headline_md"], text_color=COLORS["on_surface"]).pack(side="left", padx=24, pady=16)
+        self.drawer_title_label = ctk.CTkLabel(d_header, text="Add New Bus", font=FONTS["headline_md"], text_color=COLORS["on_surface"])
+        self.drawer_title_label.pack(side="left", padx=24, pady=16)
         close_btn = ctk.CTkButton(d_header, text="✕", width=32, height=32, fg_color="transparent", text_color=COLORS["on_surface_variant"], hover_color=COLORS["surface_container"], command=self.close_drawer)
         close_btn.pack(side="right", padx=16, pady=16)
 

@@ -62,7 +62,10 @@ class RouteManagementView(ctk.CTkFrame):
         title_content.pack(fill="x", padx=16, pady=12)
         
         ctk.CTkLabel(title_content, text="⛖ Active Routes", font=FONTS["headline_md"], text_color=COLORS["on_surface"]).pack(side="left")
-        ctk.CTkEntry(title_content, placeholder_text="Search routes...", font=FONTS["body_md"], fg_color="transparent", border_color=COLORS["outline_variant"], text_color=COLORS["on_surface"], width=200, height=32).pack(side="right")
+        self.search_var = ctk.StringVar(value="")
+        self.search_entry = ctk.CTkEntry(title_content, placeholder_text="Search routes...", textvariable=self.search_var, font=FONTS["body_md"], fg_color="transparent", border_color=COLORS["outline_variant"], text_color=COLORS["on_surface"], width=200, height=32)
+        self.search_entry.pack(side="right")
+        self.search_entry.bind("<KeyRelease>", lambda e: self._populate_grid())
         
         # Header Row
         border1 = ctk.CTkFrame(table_card, fg_color=COLORS["outline_variant"], height=1)
@@ -131,6 +134,9 @@ class RouteManagementView(ctk.CTkFrame):
             widget.destroy()
 
         routes = RouteModel.get_all_routes()
+        s_query = self.search_var.get().strip().lower() if hasattr(self, "search_var") else ""
+        if s_query:
+            routes = [r for r in routes if s_query in r["id"].lower() or s_query in r["name"].lower() or s_query in r["desc"].lower()]
 
         for i, row in enumerate(routes):
             # Alternate row background
@@ -197,12 +203,40 @@ class RouteManagementView(ctk.CTkFrame):
             c6.grid(row=0, column=5, sticky="ew", padx=4)
             c6_wrapper = ctk.CTkFrame(c6, fg_color="transparent")
             c6_wrapper.pack(anchor="e")
-            ctk.CTkButton(c6_wrapper, text="⚙", width=32, height=32, fg_color="transparent", text_color=COLORS["on_surface_variant"], hover_color=COLORS["surface_container"]).pack(side="left", padx=4)
-            ctk.CTkButton(c6_wrapper, text="⋮", width=32, height=32, fg_color="transparent", text_color=COLORS["on_surface_variant"], hover_color=COLORS["surface_container"]).pack(side="left")
+            ctk.CTkButton(
+                c6_wrapper, text="⚙", width=32, height=32, 
+                fg_color="transparent", text_color=COLORS["on_surface_variant"], hover_color=COLORS["surface_container"],
+                command=lambda r=row: self._select_route(r)
+            ).pack(side="left", padx=4)
+            ctk.CTkButton(
+                c6_wrapper, text="⏻", width=32, height=32, 
+                fg_color="#fee2e2", text_color="#dc2626", hover_color="#fca5a5", corner_radius=6,
+                command=lambda rid=row["route_id"]: self._toggle_route(rid)
+            ).pack(side="left")
+
+    def _select_route(self, route_data):
+        self.selected_route = route_data
+        self._build_side_panel(self.content_grid)
+
+    def _toggle_route(self, route_id):
+        RouteModel.toggle_route_status(route_id)
+        self._populate_grid()
+        self._build_side_panel(self.content_grid)
 
     def _build_side_panel(self, parent):
+        if hasattr(self, "side_panel_widget") and self.side_panel_widget:
+            self.side_panel_widget.destroy()
+
+        routes = RouteModel.get_all_routes()
+        curr_route = getattr(self, "selected_route", None)
+        if not curr_route and routes:
+            curr_route = routes[0]
+        if not curr_route:
+            curr_route = {"route_id": "R-01", "source": "Chennai Central", "destination": "Bangalore Shantinagar", "distance": "350 km", "duration": "360 mins", "status": "Active", "via_stops": "Vellore, Ambur, Hosur"}
+
         side_panel = ctk.CTkFrame(parent, fg_color=COLORS["surface_container_lowest"], border_color=COLORS["outline_variant"], border_width=1, corner_radius=12)
         side_panel.grid(row=0, column=1, sticky="nsew", padx=(12, 0))
+        self.side_panel_widget = side_panel
         
         # Content padding
         inner = ctk.CTkFrame(side_panel, fg_color="transparent")
@@ -215,12 +249,13 @@ class RouteManagementView(ctk.CTkFrame):
         left_h = ctk.CTkFrame(h_row, fg_color="transparent")
         left_h.pack(side="left")
         ctk.CTkLabel(left_h, text="ROUTE PREVIEW", font=FONTS["label_md"], text_color=COLORS["primary"]).pack(anchor="w")
-        ctk.CTkLabel(left_h, text="Chennai – Coimbatore", font=FONTS["headline_md"], text_color=COLORS["on_surface"]).pack(anchor="w")
-        ctk.CTkLabel(left_h, text="ID: R04", font=FONTS["data_mono"], text_color=COLORS["on_surface_variant"]).pack(anchor="w")
+        ctk.CTkLabel(left_h, text=f"{curr_route['source']} – {curr_route['destination']}", font=("Inter", 15, "bold"), text_color=COLORS["on_surface"]).pack(anchor="w")
+        ctk.CTkLabel(left_h, text=f"ID: {curr_route['route_id']}", font=FONTS["data_mono"], text_color=COLORS["on_surface_variant"]).pack(anchor="w")
         
-        badge = ctk.CTkFrame(h_row, fg_color="#ecfdf5", border_color="#a7f3d0", border_width=1, corner_radius=12)
+        is_active = (curr_route["status"] == "Active")
+        badge = ctk.CTkFrame(h_row, fg_color="#ecfdf5" if is_active else "#fee2e2", border_color="#a7f3d0" if is_active else "#fca5a5", border_width=1, corner_radius=12)
         badge.pack(side="right", anchor="n")
-        ctk.CTkLabel(badge, text="ACTIVE", text_color="#047857", font=("Inter", 10, "bold")).pack(padx=10, pady=2)
+        ctk.CTkLabel(badge, text=curr_route["status"].upper(), text_color="#047857" if is_active else "#dc2626", font=("Inter", 10, "bold")).pack(padx=10, pady=2)
 
         # Mini Stats
         stats = ctk.CTkFrame(inner, fg_color="transparent")
@@ -231,19 +266,27 @@ class RouteManagementView(ctk.CTkFrame):
         s1 = ctk.CTkFrame(stats, fg_color="transparent", border_color=COLORS["outline_variant"], border_width=1, corner_radius=8)
         s1.grid(row=0, column=0, sticky="ew", padx=(0, 6))
         ctk.CTkLabel(s1, text="Total Distance", font=("Inter", 11), text_color=COLORS["on_surface_variant"]).pack(anchor="w", padx=12, pady=(8,0))
-        ctk.CTkLabel(s1, text="510 km", font=("Inter", 14, "bold"), text_color=COLORS["on_surface"]).pack(anchor="w", padx=12, pady=(0,8))
+        ctk.CTkLabel(s1, text=str(curr_route.get("distance", "350 km")), font=("Inter", 14, "bold"), text_color=COLORS["on_surface"]).pack(anchor="w", padx=12, pady=(0,8))
 
         s2 = ctk.CTkFrame(stats, fg_color="transparent", border_color=COLORS["outline_variant"], border_width=1, corner_radius=8)
         s2.grid(row=0, column=1, sticky="ew", padx=(6, 0))
         ctk.CTkLabel(s2, text="Est. Duration", font=("Inter", 11), text_color=COLORS["on_surface_variant"]).pack(anchor="w", padx=12, pady=(8,0))
-        ctk.CTkLabel(s2, text="7h 30m", font=("Inter", 14, "bold"), text_color=COLORS["on_surface"]).pack(anchor="w", padx=12, pady=(0,8))
+        ctk.CTkLabel(s2, text=str(curr_route.get("duration", "360 mins")), font=("Inter", 14, "bold"), text_color=COLORS["on_surface"]).pack(anchor="w", padx=12, pady=(0,8))
 
         # Timeline Header
-        ctk.CTkLabel(inner, text="ROUTE STOPS (8)", font=FONTS["label_md"], text_color=COLORS["on_surface_variant"]).pack(anchor="w", pady=(0, 16))
+        via_text = curr_route.get("via_stops", "Direct Express")
+        stops_list = [curr_route["source"]] + [s.strip() for s in via_text.split(",") if s.strip()] + [curr_route["destination"]]
+        
+        ctk.CTkLabel(inner, text=f"ROUTE STOPS ({len(stops_list)})", font=FONTS["label_md"], text_color=COLORS["on_surface_variant"]).pack(anchor="w", pady=(0, 16))
         
         # Timeline
         tl = ctk.CTkFrame(inner, fg_color="transparent")
         tl.pack(fill="both", expand=True)
+
+        for i, sname in enumerate(stops_list):
+            is_endpoint = (i == 0 or i == len(stops_list) - 1)
+            item = ctk.CTkFrame(tl, fg_color="transparent")
+            item.pack(fill="x", pady=2)
         
         stops = [
             ("Chennai (CMBT)", "Source Terminal • 0 km", True),

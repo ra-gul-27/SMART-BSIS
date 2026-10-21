@@ -1,0 +1,12 @@
+{
+  "created_at": "2026-10-21T11:56:15.252022",
+  "tables": {
+    "buses": [
+      {
+        "id": 3,
+        "registration_no": "TN 01 AN 2345",
+        "bus_type": "AC Volvo Express",
+        "capacity": 45,
+        "status": "Active",
+        "driver_name": "Kannan P",
+        "last_maintenance": 

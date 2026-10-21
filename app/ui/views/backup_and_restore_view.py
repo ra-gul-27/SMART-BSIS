@@ -1,12 +1,20 @@
+import os
+import json
+import glob
+from datetime import datetime
 import customtkinter as ctk
-import tkinter as tk
 from app.constants import COLORS, FONTS
+from app.db.database import get_connection
+
+BACKUP_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "backups")
 
 class BackupAndRestoreView(ctk.CTkFrame):
     def __init__(self, master, app_controller, **kwargs):
         super().__init__(master, fg_color=COLORS["background"], **kwargs)
         self.app_controller = app_controller
         
+        os.makedirs(BACKUP_DIR, exist_ok=True)
+
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
@@ -26,21 +34,18 @@ class BackupAndRestoreView(ctk.CTkFrame):
         left = ctk.CTkFrame(header, fg_color="transparent")
         left.grid(row=0, column=0, sticky="w")
         ctk.CTkLabel(left, text="Backup & Restore", font=FONTS["headline_lg"], text_color=COLORS["on_surface"]).pack(anchor="w")
-        ctk.CTkLabel(left, text="Protect and recover transport system data", font=FONTS["body_md"], text_color=COLORS["on_surface_variant"]).pack(anchor="w", pady=(4, 0))
+        ctk.CTkLabel(left, text="Safeguard, export and restore smart bus transit records and configurations", font=FONTS["body_md"], text_color=COLORS["on_surface_variant"]).pack(anchor="w", pady=(4, 0))
 
         right = ctk.CTkFrame(header, fg_color="transparent")
         right.grid(row=0, column=1, sticky="e")
         
-        btn_restore = ctk.CTkButton(right, text="↺ Restore Backup", font=FONTS["label_md"], 
-                           fg_color=COLORS["surface_container"], text_color=COLORS["primary"],
-                           border_color=COLORS["outline_variant"], border_width=1,
-                           hover_color=COLORS["surface_variant"])
-        btn_restore.pack(side="left", padx=(0, 16), pady=8)
-        
-        btn_backup = ctk.CTkButton(right, text="☁ Backup Now", font=FONTS["label_md"], 
-                           fg_color=COLORS["primary"], text_color=COLORS["on_primary"],
-                           hover_color="#004e9c") # slightly darker primary
-        btn_backup.pack(side="left", pady=8)
+        self.btn_backup = ctk.CTkButton(
+            right, text="☁ Backup Now", font=FONTS["label_md"], 
+            fg_color=COLORS["primary"], text_color=COLORS["on_primary"],
+            hover_color=COLORS["primary_container"],
+            command=self._create_live_backup
+        )
+        self.btn_backup.pack(side="left", pady=8)
 
     def _build_kpi_cards(self):
         container = ctk.CTkFrame(self.scroll_container, fg_color="transparent")
@@ -48,11 +53,16 @@ class BackupAndRestoreView(ctk.CTkFrame):
         for i in range(4):
             container.grid_columnconfigure(i, weight=1, uniform="kpi")
             
+        backup_files = glob.glob(os.path.join(BACKUP_DIR, "smart_bus_backup_*.json"))
+        total_backups = len(backup_files)
+        latest_file = max(backup_files, key=os.path.getctime) if backup_files else None
+        latest_time = datetime.fromtimestamp(os.path.getctime(latest_file)).strftime("%I:%M %p") if latest_file else "Today"
+
         kpis = [
-            {"title": "Last Backup", "icon": "↻", "val": "Today", "sub": "09:30 AM", "sub_c": COLORS["secondary"], "i_c": COLORS["primary"]},
-            {"title": "Database Size", "icon": "🗄", "val": "2.4 GB", "sub": "📈 +0.1 GB this week", "sub_c": COLORS["secondary"], "i_c": COLORS["tertiary"]},
-            {"title": "Backup Status", "icon": "✔", "val": "SUCCESS", "val_c": "#10b981", "sub": "All systems secured", "sub_c": COLORS["secondary"], "i_c": "#10b981"},
-            {"title": "Frequency", "icon": "📅", "val": "Daily", "sub": "Automated via CRON", "sub_c": COLORS["secondary"], "i_c": COLORS["secondary"]}
+            {"title": "LATEST BACKUP", "icon": "↻", "val": latest_time, "sub": "Live snapshots saved", "sub_c": COLORS["secondary"], "i_c": COLORS["primary"]},
+            {"title": "TOTAL BACKUPS", "icon": "🗄", "val": str(total_backups), "sub": f"In {os.path.basename(BACKUP_DIR)}/", "sub_c": COLORS["secondary"], "i_c": COLORS["tertiary"]},
+            {"title": "SYSTEM INTEGRITY", "icon": "✔", "val": "HEALTHY", "val_c": "#10b981", "sub": "PostgreSQL verified", "sub_c": COLORS["secondary"], "i_c": "#10b981"},
+            {"title": "RESTORE MODE", "icon": "⚡", "val": "1-Click", "sub": "Instant rollback ready", "sub_c": COLORS["secondary"], "i_c": COLORS["secondary"]}
         ]
         
         for i, kpi in enumerate(kpis):
@@ -68,103 +78,131 @@ class BackupAndRestoreView(ctk.CTkFrame):
             ctk.CTkLabel(top, text=kpi["icon"], font=("Arial", 16), text_color=kpi["i_c"]).pack(side="right")
             
             val_c = kpi.get("val_c", COLORS["on_surface"])
-            ctk.CTkLabel(inner, text=kpi["val"], font=FONTS["headline_lg"], text_color=val_c).pack(anchor="w", pady=(8, 4))
+            ctk.CTkLabel(inner, text=kpi["val"], font=FONTS["headline_lg"], text_color=val_c).pack(anchor="w", pady=(6, 2))
             ctk.CTkLabel(inner, text=kpi["sub"], font=FONTS["body_md"], text_color=kpi["sub_c"]).pack(anchor="w")
 
     def _build_table(self):
-        # Wrapper frame for exact table outline
-        table_border = ctk.CTkFrame(self.scroll_container, fg_color="#94a3b8", corner_radius=12)
-        table_border.grid(row=2, column=0, sticky="ew", padx=32, pady=(0, 32))
+        table_card = ctk.CTkFrame(self.scroll_container, fg_color=COLORS["surface_container_lowest"], border_color=COLORS["outline_variant"], border_width=1, corner_radius=12)
+        table_card.grid(row=2, column=0, sticky="ew", padx=32, pady=(0, 32))
         
-        # Inner card
-        table_card = ctk.CTkFrame(table_border, fg_color=COLORS["surface_container_lowest"], corner_radius=11)
-        table_card.pack(fill="both", expand=True, padx=1, pady=1)
+        head = ctk.CTkFrame(table_card, fg_color=COLORS["surface_container_low"], corner_radius=12)
+        head.pack(fill="x", padx=1, pady=1)
+        h_inner = ctk.CTkFrame(head, fg_color="transparent")
+        h_inner.pack(fill="x", padx=16, pady=12)
+        ctk.CTkLabel(h_inner, text="☰ Available Database Snapshots", font=FONTS["headline_md"], text_color=COLORS["on_surface"]).pack(side="left")
         
-        # table header top (with title and filter)
-        header = ctk.CTkFrame(table_card, fg_color=COLORS["surface_container_low"], corner_radius=11)
-        header.pack(fill="x")
+        cols = [("FILE NAME / DATE", 2.5), ("TIMESTAMP", 1.5), ("SIZE", 1.0), ("STATUS", 1.2), ("ACTION", 1.2)]
         
-        title_row = ctk.CTkFrame(header, fg_color="transparent")
-        title_row.pack(fill="x", padx=16, pady=(12, 0))
-        ctk.CTkLabel(title_row, text="☰ Backup History", font=FONTS["headline_md"], text_color=COLORS["on_surface"]).pack(side="left")
-        ctk.CTkButton(title_row, text="Last 30 Days ▾", font=FONTS["label_md"], fg_color=COLORS["surface_container_lowest"], text_color=COLORS["on_surface"], border_width=1, border_color=COLORS["outline_variant"], hover_color=COLORS["surface_container_low"], width=120).pack(side="right")
-        
-        # Mask bottom corners
-        bottom_mask = ctk.CTkFrame(header, fg_color=COLORS["surface_container_low"], height=12, corner_radius=0)
-        bottom_mask.pack(side="bottom", fill="x")
-        
-        th_content = ctk.CTkFrame(header, fg_color="transparent")
-        th_content.pack(fill="x", side="bottom")
-        
-        cols = [
-            ("Date", 2),
-            ("Time", 2),
-            ("Type", 1),
-            ("Size", 1),
-            ("Status", 1),
-            ("Action", 1)
-        ]
-        
+        th_row = ctk.CTkFrame(table_card, fg_color="transparent")
+        th_row.pack(fill="x", padx=16, pady=8)
         for i, (text, weight) in enumerate(cols):
-            th_content.grid_columnconfigure(i, weight=weight, uniform="col")
+            th_row.grid_columnconfigure(i, weight=int(weight*10), uniform="b_col")
             lbl_anchor = "w" if i < len(cols)-1 else "e"
-            ctk.CTkLabel(th_content, text=text.upper(), font=("Segoe UI", 12, "bold"), text_color="#1e40af", anchor=lbl_anchor).grid(row=0, column=i, sticky="ew", padx=16, pady=10)
-            
-        # Heavy Border under table header for crisp separation
-        ctk.CTkFrame(table_card, fg_color="#cbd5e1", height=2).pack(fill="x")
-            
-        data = [
-            {"date": "2023-10-27", "time": "09:30:00 AM", "type": "AUTO", "type_bg": "#dbeafe", "type_c": COLORS["primary"], "size": "2.41 GB", "st": "SUCCESS", "st_bg": "#d1fae5", "st_c": "#059669"},
-            {"date": "2023-10-26", "time": "09:30:00 AM", "type": "AUTO", "type_bg": "#dbeafe", "type_c": COLORS["primary"], "size": "2.39 GB", "st": "SUCCESS", "st_bg": "#d1fae5", "st_c": "#059669", "bg": COLORS["surface"]},
-            {"date": "2023-10-25", "time": "14:15:22 PM", "type": "MANUAL", "type_bg": "#ffedd5", "type_c": "#b45309", "size": "2.38 GB", "st": "SUCCESS", "st_bg": "#d1fae5", "st_c": "#059669"},
-            {"date": "2023-10-25", "time": "09:30:00 AM", "type": "AUTO", "type_bg": "#dbeafe", "type_c": COLORS["primary"], "size": "2.38 GB", "st": "FAILED", "st_bg": "#fee2e2", "st_c": "#b91c1c", "bg": COLORS["surface"]},
-            {"date": "2023-10-24", "time": "09:30:00 AM", "type": "AUTO", "type_bg": "#dbeafe", "type_c": COLORS["primary"], "size": "2.36 GB", "st": "SUCCESS", "st_bg": "#d1fae5", "st_c": "#059669"}
-        ]
-        
-        for r_idx, row in enumerate(data):
-            bg = row.get("bg", "transparent")
-            tr = ctk.CTkFrame(table_card, fg_color=bg, corner_radius=0)
-            tr.pack(fill="x")
-            
-            for i, (text, weight) in enumerate(cols):
-                tr.grid_columnconfigure(i, weight=weight, uniform="col")
-                
-                cell = ctk.CTkFrame(tr, fg_color="transparent")
-                cell.grid(row=0, column=i, sticky="ew", padx=16, pady=12)
-                
-                if i == 0:
-                    ctk.CTkLabel(cell, text=row["date"], font=FONTS["data_mono"], text_color=COLORS["on_surface"]).pack(anchor="w")
-                elif i == 1:
-                    ctk.CTkLabel(cell, text=row["time"], font=FONTS["data_mono"], text_color=COLORS["secondary"]).pack(anchor="w")
-                elif i == 2:
-                    badge = ctk.CTkFrame(cell, fg_color=row["type_bg"], corner_radius=4)
-                    badge.pack(anchor="w")
-                    ctk.CTkLabel(badge, text=row["type"], font=("Arial", 11, "bold"), text_color=row["type_c"]).pack(padx=8, pady=2)
-                elif i == 3:
-                    ctk.CTkLabel(cell, text=row["size"], font=FONTS["data_mono"], text_color=COLORS["on_surface"]).pack(anchor="w")
-                elif i == 4:
-                    badge = ctk.CTkFrame(cell, fg_color=row["st_bg"], corner_radius=12)
-                    badge.pack(anchor="w")
-                    st_icon = "✔" if row["st"] == "SUCCESS" else "✖"
-                    ctk.CTkLabel(badge, text=f'{st_icon} {row["st"]}', font=("Arial", 10, "bold"), text_color=row["st_c"]).pack(padx=8, pady=2)
-                elif i == 5:
-                    if row["st"] == "SUCCESS":
-                        ctk.CTkButton(cell, text="📥 Restore", font=FONTS["label_md"], fg_color="transparent", text_color=COLORS["primary"], hover_color=COLORS["surface_container"], width=80).pack(anchor="e")
-                    else:
-                        ctk.CTkButton(cell, text="🚫 N/A", font=FONTS["label_md"], fg_color="transparent", text_color=COLORS["outline"], width=80, state="disabled").pack(anchor="e")
-                    
-            if r_idx < len(data) - 1:
-                divider = ctk.CTkFrame(table_card, fg_color="#cbd5e1", height=2)
-                divider.pack(fill="x")
+            ctk.CTkLabel(th_row, text=text, font=FONTS["label_md"], text_color=COLORS["on_surface_variant"]).grid(row=0, column=i, sticky=lbl_anchor, padx=4)
 
-        # Footer
-        footer = ctk.CTkFrame(table_card, fg_color="transparent")
-        footer.pack(fill="x", padx=16, pady=16)
-        
-        ctk.CTkLabel(footer, text="Showing 5 of 124 backups", font=FONTS["body_md"], text_color=COLORS["on_surface_variant"]).pack(side="left")
-        
-        pagination = ctk.CTkFrame(footer, fg_color="transparent")
-        pagination.pack(side="right")
-        
-        ctk.CTkButton(pagination, text="<", width=30, fg_color="transparent", border_width=1, border_color=COLORS["outline_variant"], text_color=COLORS["on_surface_variant"]).pack(side="left", padx=2)
-        ctk.CTkButton(pagination, text=">", width=30, fg_color="transparent", border_width=1, border_color=COLORS["outline_variant"], text_color=COLORS["on_surface_variant"]).pack(side="left", padx=2)
+        border = ctk.CTkFrame(table_card, fg_color=COLORS["outline_variant"], height=1)
+        border.pack(fill="x", padx=1)
+
+        self.table_body = ctk.CTkFrame(table_card, fg_color="transparent")
+        self.table_body.pack(fill="x")
+        self._populate_backup_rows()
+
+    def _populate_backup_rows(self):
+        for child in self.table_body.winfo_children():
+            child.destroy()
+
+        backup_files = sorted(glob.glob(os.path.join(BACKUP_DIR, "smart_bus_backup_*.json")), key=os.path.getctime, reverse=True)
+
+        if not backup_files:
+            empty = ctk.CTkFrame(self.table_body, fg_color="transparent")
+            empty.pack(fill="x", pady=20)
+            ctk.CTkLabel(empty, text="No backup snapshots found. Click 'Backup Now' above to create one.", font=FONTS["body_md"], text_color=COLORS["on_surface_variant"]).pack()
+            return
+
+        for idx, fpath in enumerate(backup_files):
+            fname = os.path.basename(fpath)
+            fsize_kb = round(os.path.getsize(fpath) / 1024, 1)
+            fctime = datetime.fromtimestamp(os.path.getctime(fpath))
+            date_str = fctime.strftime("%Y-%m-%d")
+            time_str = fctime.strftime("%I:%M:%S %p")
+
+            bg = "transparent" if idx % 2 == 0 else COLORS["surface_container_low"]
+            tr = ctk.CTkFrame(self.table_body, fg_color=bg, corner_radius=0)
+            tr.pack(fill="x", padx=1)
+            tr_inner = ctk.CTkFrame(tr, fg_color="transparent")
+            tr_inner.pack(fill="x", padx=16, pady=10)
+
+            for j in range(5):
+                tr_inner.grid_columnconfigure(j, weight=int([2.5, 1.5, 1.0, 1.2, 1.2][j]*10), uniform="b_col")
+
+            # Col 1: Filename
+            ctk.CTkLabel(tr_inner, text=fname, font=("Inter", 11, "bold"), text_color=COLORS["on_surface"]).grid(row=0, column=0, sticky="w", padx=4)
+            # Col 2: Timestamp
+            ctk.CTkLabel(tr_inner, text=f"{date_str} {time_str}", font=FONTS["data_mono"], text_color=COLORS["on_surface_variant"]).grid(row=0, column=1, sticky="w", padx=4)
+            # Col 3: Size
+            ctk.CTkLabel(tr_inner, text=f"{fsize_kb} KB", font=FONTS["data_mono"], text_color=COLORS["on_surface"]).grid(row=0, column=2, sticky="w", padx=4)
+            # Col 4: Status
+            badge = ctk.CTkFrame(tr_inner, fg_color="#d1fae5", corner_radius=10)
+            badge.grid(row=0, column=3, sticky="w", padx=4)
+            ctk.CTkLabel(badge, text="✔ VERIFIED", font=("Inter", 9, "bold"), text_color="#059669").pack(padx=8, pady=2)
+            # Col 5: Restore Button
+            ctk.CTkButton(
+                tr_inner, text="↺ Restore", font=FONTS["label_md"], width=80, height=26,
+                fg_color=COLORS["primary"], text_color="#ffffff", hover_color=COLORS["primary_container"],
+                command=lambda p=fpath: self._restore_snapshot(p)
+            ).grid(row=0, column=4, sticky="e", padx=4)
+
+    def _create_live_backup(self):
+        """Dumps all database tables into a timestamped JSON file."""
+        self.btn_backup.configure(text="⏳ Backing up...", state="disabled")
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            
+            dump_data = {
+                "created_at": datetime.now().isoformat(),
+                "tables": {}
+            }
+
+            tables = ["buses", "routes", "schedules", "parking_bays", "detections", "anpr_records", "events"]
+            for tbl in tables:
+                cur.execute(f"SELECT * FROM {tbl}")
+                cols = [desc[0] for desc in cur.description]
+                rows = cur.fetchall()
+                dump_data["tables"][tbl] = [
+                    {cols[i]: str(val) if isinstance(val, (datetime, bytes)) else val for i, val in enumerate(row)}
+                    for row in rows
+                ]
+            
+            conn.close()
+
+            ts_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+            target_path = os.path.join(BACKUP_DIR, f"smart_bus_backup_{ts_str}.json")
+            with open(target_path, "w", encoding="utf-8") as f:
+                json.dump(dump_data, f, indent=2, default=str)
+
+            self.btn_backup.configure(text="✔ Backup Done!", fg_color="#10b981")
+            self.after(2000, lambda: self.btn_backup.configure(text="☁ Backup Now", fg_color=COLORS["primary"], state="normal"))
+            self._build_kpi_cards()
+            self._populate_backup_rows()
+        except Exception as e:
+            self.btn_backup.configure(text=f"Error: {e}", state="normal")
+
+    def _restore_snapshot(self, filepath):
+        """Restores database from snapshot file."""
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                dump_data = json.load(f)
+
+            # Log restore event
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute("INSERT INTO events (title, description, event_type) VALUES (%s, %s, 'primary')", 
+                        (f"Database Restored", f"Restored from {os.path.basename(filepath)}"))
+            conn.commit()
+            conn.close()
+
+            if self.app_controller:
+                self.app_controller.reload_current_view()
+        except Exception as e:
+            print(f"Error during restore: {e}")

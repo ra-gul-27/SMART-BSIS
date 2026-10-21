@@ -171,6 +171,34 @@ class DashboardView(ctk.CTkScrollableFrame):
         # 3. MAIN CONTENT (Bento Box style)
         self._build_main_content()
 
+        # Periodic Auto-Refresh
+        self._refresh_timer = None
+        self._schedule_refresh()
+
+    def _schedule_refresh(self):
+        self._refresh_timer = self.after(5000, self._auto_refresh_data)
+
+    def _auto_refresh_data(self):
+        if not self.winfo_exists():
+            return
+        try:
+            # Update KPI card values
+            kpis = DashboardModel.get_kpis()
+            for idx, kpi in enumerate(kpis):
+                if idx < len(self.kpi_widgets):
+                    self.kpi_widgets[idx].update_value(kpi["value"])
+        except Exception:
+            pass
+        self._schedule_refresh()
+
+    def destroy(self):
+        if hasattr(self, "_refresh_timer") and self._refresh_timer:
+            try:
+                self.after_cancel(self._refresh_timer)
+            except Exception:
+                pass
+        super().destroy()
+
     def _build_header(self):
         header_frame = ctk.CTkFrame(self, fg_color="transparent")
         header_frame.grid(row=0, column=0, sticky="ew", padx=32, pady=(32, 16))
@@ -267,7 +295,7 @@ class DashboardView(ctk.CTkScrollableFrame):
             border = 0 if is_occ else 1
             default_bc = COLORS["outline_variant"] if not is_occ else COLORS["primary"]
 
-            bay_card = ctk.CTkFrame(p_grid, fg_color=bg, border_color=default_bc, border_width=border if border>0 else 1, corner_radius=8, height=80)
+            bay_card = ctk.CTkFrame(p_grid, fg_color=bg, border_color=default_bc, border_width=border if border>0 else 1, corner_radius=8, height=80, cursor="hand2")
             bay_card.pack_propagate(False)
             bay_card.grid(row=row, column=col, sticky="nsew", padx=8, pady=8)
             
@@ -275,14 +303,26 @@ class DashboardView(ctk.CTkScrollableFrame):
             hover_c = COLORS["on_primary_fixed_variant"] if is_occ else COLORS["primary"]
             add_hover_effect(bay_card, hover_color=hover_c, default_color=default_bc, hover_width=2, default_width=border if border>0 else 1)
 
+            def open_bay_mgmt(e):
+                if self.app_controller:
+                    self.app_controller.show_view("ParkingBayManagement")
+
+            bay_card.bind("<Button-1>", open_bay_mgmt)
+
             if is_occ:
                 icon_lbl = ctk.CTkLabel(bay_card, text="ⓘ", text_color=COLORS["on_primary"], font=("Arial", 12))
                 icon_lbl.place(relx=0.85, rely=0.15, anchor="center")
+                icon_lbl.bind("<Button-1>", open_bay_mgmt)
 
-            ctk.CTkLabel(bay_card, text=bay["id"], font=FONTS["headline_md"], text_color=tc).pack(pady=(16,0))
+            lbl_id = ctk.CTkLabel(bay_card, text=bay["id"], font=FONTS["headline_md"], text_color=tc)
+            lbl_id.pack(pady=(16,0))
+            lbl_id.bind("<Button-1>", open_bay_mgmt)
+
             sub_text = bay["vehicle"] if is_occ else "Available"
             sub_tc = COLORS["on_primary"] if is_occ else COLORS["on_surface_variant"]
-            ctk.CTkLabel(bay_card, text=sub_text, font=("Inter", 10), text_color=sub_tc).pack()
+            lbl_sub = ctk.CTkLabel(bay_card, text=sub_text, font=("Inter", 10), text_color=sub_tc)
+            lbl_sub.pack()
+            lbl_sub.bind("<Button-1>", open_bay_mgmt)
 
         # Quick Actions
         actions_grid = ctk.CTkFrame(left_col, fg_color="transparent")

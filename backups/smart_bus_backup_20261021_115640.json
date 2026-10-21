@@ -1,0 +1,1225 @@
+{
+  "created_at": "2026-10-21T11:56:40.286413",
+  "tables": {
+    "buses": [
+      {
+        "id": 3,
+        "registration_no": "TN 01 AN 2345",
+        "bus_type": "AC Volvo Express",
+        "capacity": 45,
+        "status": "Active",
+        "driver_name": "Kannan P",
+        "last_maintenance": "2026-10-15"
+      },
+      {
+        "id": 7,
+        "registration_no": "TN 38 N 4567",
+        "bus_type": "Deluxe Air-Suspension",
+        "capacity": 48,
+        "status": "Active",
+        "driver_name": "M. Selvan",
+        "last_maintenance": "2026-10-18"
+      },
+      {
+        "id": 1,
+        "registration_no": "TN 01 AB 1234",
+        "bus_type": "AC Semi-Sleeper",
+        "capacity": 45,
+        "status": "Active",
+        "driver_name": "Rajesh Kumar",
+        "last_maintenance": "2026-10-10"
+      },
+      {
+        "id": 2,
+        "registration_no": "TN 02 XY 9876",
+        "bus_type": "Super Fast Seater",
+        "capacity": 55,
+        "status": "Active",
+        "driver_name": "Suresh M",
+        "last_maintenance": "2026-10-12"
+      },
+      {
+        "id": 4,
+        "registration_no": "TN 05 XY 7788",
+        "bus_type": "Classic Sleeper",
+        "capacity": 36,
+        "status": "Active",
+        "driver_name": "Murugan S",
+        "last_maintenance": "2026-10-08"
+      },
+      {
+        "id": 11,
+        "registration_no": "TN 43 B 1284",
+        "bus_type": "Ultra Deluxe",
+        "capacity": 50,
+        "status": "Active",
+        "driver_name": "V. Anand",
+        "last_maintenance": "2026-10-14"
+      }
+    ],
+    "routes": [
+      {
+        "id": 1,
+        "route_id": "R-01",
+        "source": "Chennai Central",
+        "destination": "Bangalore Shantinagar",
+        "via_stops": "Vellore, Ambur, Hosur",
+        "distance_km": 350.0,
+        "duration_mins": 360,
+        "status": "Active"
+      },
+      {
+        "id": 2,
+        "route_id": "R-02",
+        "source": "Chennai Central",
+        "destination": "Coimbatore Gandhipuram",
+        "via_stops": "Salem, Erode, Tiruppur",
+        "distance_km": 510.0,
+        "duration_mins": 480,
+        "status": "Active"
+      },
+      {
+        "id": 3,
+        "route_id": "R-03",
+        "source": "Chennai Central",
+        "destination": "Madurai Mattuthavani",
+        "via_stops": "Villupuram, Trichy, Dindigul",
+        "distance_km": 460.0,
+        "duration_mins": 450,
+        "status": "Active"
+      },
+      {
+        "id": 8,
+        "route_id": "R-04",
+        "source": "Chennai Central",
+        "destination": "Pondicherry Bus Stand",
+        "via_stops": "Mahabalipuram, Marakkanam",
+        "distance_km": 160.0,
+        "duration_mins": 180,
+        "status": "Active"
+      },
+      {
+        "id": 9,
+        "route_id": "R-05",
+        "source": "Chennai Central",
+        "destination": "Salem New Bus Stand",
+        "via_stops": "Ulundurpet, Kallakurichi",
+        "distance_km": 340.0,
+        "duration_mins": 330,
+        "status": "Active"
+      }
+    ],
+    "schedules": [
+      {
+        "id": 1,
+        "bus_no": "TN 01 AN 2345",
+        "route": "R-01 (Chennai - Bangalore)",
+        "destination": "Bangalore Shantinagar",
+        "bay": "B02",
+        "departure_time": "11:45 AM",
+        "arrival_time": "05:45 PM",
+        "fare": "Rs 650.00",
+        "status": "BOARDING"
+      },
+      {
+        "id": 2,
+        "bus_no": "TN 38 N 4567",
+        "route": "R-02 (Chennai - Coimbatore)",
+        "destination": "Coimbatore Gandhipuram",
+        "bay": "B03",
+        "departure_time": "12:30 PM",
+        "arrival_time": "08:30 PM",
+        "fare": "Rs 720.00",
+        "status": "SCHEDULED"
+      },
+      {
+        "id": 5,
+        "bus_no": "TN 05 XY 7788",
+        "route": "R-05 (Chennai - Salem)",
+        "destination": "Salem New Bus Stand",
+        "bay": "B05",
+        "departure_time": "02:45 PM",
+        "arrival_time": "08:15 PM",
+        "fare": "Rs 450.00",
+        "status": "SCHEDULED"
+      },
+      {
+        "id": 6,
+        "bus_no": "TN 43 B 1284",
+        "route": "R-01 (Chennai - Bangalore)",
+        "destination": "Bangalore Shantinagar",
+        "bay": "B06",
+        "departure_time": "03:30 PM",
+        "arrival_time": "09:30 PM",
+        "fare": "Rs 650.00",
+        "status": "SCHEDULED"
+      },
+      {
+        "id": 4,
+        "bus_no": "TN 02 XY 9876",
+        "route": "R-04 (Chennai - Pondicherry)",
+        "destination": "Pondicherry Bus Stand",
+        "bay": "B04",
+        "departure_time": "02:00 PM",
+        "arrival_time": "05:00 PM",
+        "fare": "Rs 220.00",
+        "status": "BOARDING"
+      },
+      {
+        "id": 3,
+        "bus_no": "TN 01 AB 1234",
+        "route": "R-03 (Chennai - Madurai)",
+        "destination": "Madurai Mattuthavani",
+        "bay": "B01",
+        "departure_time": "01:15 PM",
+        "arrival_time": "08:45 PM",
+        "fare": "Rs 580.00",
+        "status": "BOARDING"
+      }
+    ],
+    "parking_bays": [
+      {
+        "id": 2,
+        "bay_id": "B02",
+        "status": "Occupied",
+        "vehicle_reg": "TN 01 AN 2345",
+        "polygon_points": "[[350, 100], [620, 100], [620, 380], [350, 380]]"
+      },
+      {
+        "id": 3,
+        "bay_id": "B03",
+        "status": "Occupied",
+        "vehicle_reg": "TN 38 N 4567",
+        "polygon_points": "[[650, 100], [920, 100], [920, 380], [650, 380]]"
+      },
+      {
+        "id": 5,
+        "bay_id": "B05",
+        "status": "Available",
+        "vehicle_reg": null,
+        "polygon_points": "[[50, 420], [320, 420], [320, 700], [50, 700]]"
+      },
+      {
+        "id": 6,
+        "bay_id": "B06",
+        "status": "Available",
+        "vehicle_reg": null,
+        "polygon_points": "[[350, 420], [620, 420], [620, 700], [350, 700]]"
+      },
+      {
+        "id": 7,
+        "bay_id": "B07",
+        "status": "Available",
+        "vehicle_reg": null,
+        "polygon_points": "[[650, 420], [920, 420], [920, 700], [650, 700]]"
+      },
+      {
+        "id": 8,
+        "bay_id": "B08",
+        "status": "Available",
+        "vehicle_reg": null,
+        "polygon_points": "[[950, 420], [1220, 420], [1220, 700], [950, 700]]"
+      },
+      {
+        "id": 4,
+        "bay_id": "B04",
+        "status": "Occupied",
+        "vehicle_reg": "TN 02 XY 9876",
+        "polygon_points": "[[950, 100], [1220, 100], [1220, 380], [950, 380]]"
+      },
+      {
+        "id": 1,
+        "bay_id": "B01",
+        "status": "Occupied",
+        "vehicle_reg": "TN 01 AB 1234",
+        "polygon_points": "[[50, 100], [320, 100], [320, 380], [50, 380]]"
+      }
+    ],
+    "detections": [
+      {
+        "id": 1,
+        "bus_registration": "TN 01 AN 2345",
+        "bay_id": "B02",
+        "timestamp": "2026-10-20 16:43:40.063383",
+        "confidence": 96.4
+      },
+      {
+        "id": 2,
+        "bus_registration": "TN 38 N 456",
+        "bay_id": "B03",
+        "timestamp": "2026-10-20 16:52:22.263750",
+        "confidence": 89.3
+      },
+      {
+        "id": 3,
+        "bus_registration": "TN 38 N 456",
+        "bay_id": "B03",
+        "timestamp": "2026-10-21 05:17:22.807055",
+        "confidence": 89.3
+      },
+      {
+        "id": 4,
+        "bus_registration": "UNKNOWN",
+        "bay_id": "B01",
+        "timestamp": "2026-10-21 05:47:20.955870",
+        "confidence": 94.5
+      },
+      {
+        "id": 5,
+        "bus_registration": "TN 01 AN 2345",
+        "bay_id": "B02",
+        "timestamp": "2026-10-21 06:01:32.663706",
+        "confidence": 71.5
+      },
+      {
+        "id": 6,
+        "bus_registration": "TN 02 XY 9876",
+        "bay_id": "B04",
+        "timestamp": "2026-10-21 06:14:47.278197",
+        "confidence": 67.7
+      },
+      {
+        "id": 7,
+        "bus_registration": "TN 01 AB 1234",
+        "bay_id": "B01",
+        "timestamp": "2026-10-21 06:25:39.136005",
+        "confidence": 59.1
+      }
+    ],
+    "anpr_records": [
+      {
+        "id": 1,
+        "timestamp": "2026-09-13 23:12:23.095558",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-01 (Entry)",
+        "confidence": 80.4,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 2,
+        "timestamp": "2026-09-13 23:12:33.187005",
+        "plate_number": "MH 12 EF 9012",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 95.9,
+        "match_status": "Verified"
+      },
+      {
+        "id": 3,
+        "timestamp": "2026-09-13 23:12:43.271059",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 79.6,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 4,
+        "timestamp": "2026-09-13 23:12:53.418033",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 91.5,
+        "match_status": "Verified"
+      },
+      {
+        "id": 5,
+        "timestamp": "2026-09-13 23:13:03.510011",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 80.7,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 6,
+        "timestamp": "2026-09-13 23:13:13.598407",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 83.9,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 7,
+        "timestamp": "2026-09-13 23:13:23.669816",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-01 (Entry)",
+        "confidence": 97.0,
+        "match_status": "Verified"
+      },
+      {
+        "id": 8,
+        "timestamp": "2026-09-13 23:13:33.760037",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 80.7,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 9,
+        "timestamp": "2026-09-13 23:13:36.243391",
+        "plate_number": "KL 07 CD 5678",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 87.8,
+        "match_status": "Verified"
+      },
+      {
+        "id": 10,
+        "timestamp": "2026-09-13 23:13:43.909356",
+        "plate_number": "KL 07 CD 5678",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 73.3,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 11,
+        "timestamp": "2026-09-13 23:13:46.396630",
+        "plate_number": "DL 4C AZ 9988",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 92.6,
+        "match_status": "Verified"
+      },
+      {
+        "id": 12,
+        "timestamp": "2026-09-13 23:13:54.065636",
+        "plate_number": "KA 05 XY 1122",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 73.7,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 13,
+        "timestamp": "2026-09-13 23:13:56.463585",
+        "plate_number": "DL 4C AZ 9988",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 73.4,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 14,
+        "timestamp": "2026-09-13 23:14:04.149682",
+        "plate_number": "DL 4C AZ 9988",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 87.6,
+        "match_status": "Verified"
+      },
+      {
+        "id": 15,
+        "timestamp": "2026-09-13 23:14:06.545910",
+        "plate_number": "KL 07 CD 5678",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 73.4,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 16,
+        "timestamp": "2026-09-13 23:14:14.274556",
+        "plate_number": "MH 12 EF 9012",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 77.9,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 17,
+        "timestamp": "2026-09-13 23:14:16.621961",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 77.6,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 18,
+        "timestamp": "2026-09-13 23:14:24.359364",
+        "plate_number": "DL 4C AZ 9988",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 99.1,
+        "match_status": "Verified"
+      },
+      {
+        "id": 19,
+        "timestamp": "2026-09-13 23:14:26.769136",
+        "plate_number": "MH 12 EF 9012",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 73.3,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 20,
+        "timestamp": "2026-09-13 23:14:34.445479",
+        "plate_number": "KL 07 CD 5678",
+        "camera_loc": "CAM-01 (Entry)",
+        "confidence": 76.9,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 21,
+        "timestamp": "2026-09-13 23:14:36.837457",
+        "plate_number": "MH 12 EF 9012",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 73.4,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 22,
+        "timestamp": "2026-09-13 23:14:44.592540",
+        "plate_number": "DL 4C AZ 9988",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 80.0,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 23,
+        "timestamp": "2026-09-13 23:14:46.908077",
+        "plate_number": "KL 07 CD 5678",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 72.0,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 24,
+        "timestamp": "2026-09-13 23:14:54.666744",
+        "plate_number": "KA 05 XY 1122",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 71.0,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 25,
+        "timestamp": "2026-09-13 23:15:04.813173",
+        "plate_number": "DL 4C AZ 9988",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 94.5,
+        "match_status": "Verified"
+      },
+      {
+        "id": 26,
+        "timestamp": "2026-09-13 23:15:14.967951",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 80.3,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 27,
+        "timestamp": "2026-09-13 23:15:25.102899",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 93.5,
+        "match_status": "Verified"
+      },
+      {
+        "id": 28,
+        "timestamp": "2026-09-13 23:15:35.234522",
+        "plate_number": "KL 07 CD 5678",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 78.7,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 29,
+        "timestamp": "2026-09-13 23:15:45.405588",
+        "plate_number": "DL 4C AZ 9988",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 74.9,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 30,
+        "timestamp": "2026-09-13 23:15:55.559600",
+        "plate_number": "KA 05 XY 1122",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 96.1,
+        "match_status": "Verified"
+      },
+      {
+        "id": 31,
+        "timestamp": "2026-09-13 23:16:05.664499",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 93.5,
+        "match_status": "Verified"
+      },
+      {
+        "id": 32,
+        "timestamp": "2026-09-13 23:16:15.753062",
+        "plate_number": "KA 05 XY 1122",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 76.8,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 33,
+        "timestamp": "2026-09-13 23:16:25.956023",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 78.4,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 34,
+        "timestamp": "2026-09-13 23:16:36.113435",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 92.3,
+        "match_status": "Verified"
+      },
+      {
+        "id": 35,
+        "timestamp": "2026-09-13 23:16:41.802434",
+        "plate_number": "DL 4C AZ 9988",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 79.8,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 36,
+        "timestamp": "2026-09-13 23:16:46.255611",
+        "plate_number": "KA 05 XY 1122",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 98.2,
+        "match_status": "Verified"
+      },
+      {
+        "id": 37,
+        "timestamp": "2026-09-13 23:16:51.884304",
+        "plate_number": "MH 12 EF 9012",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 88.3,
+        "match_status": "Verified"
+      },
+      {
+        "id": 38,
+        "timestamp": "2026-09-13 23:16:54.067740",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 89.8,
+        "match_status": "Verified"
+      },
+      {
+        "id": 39,
+        "timestamp": "2026-09-13 23:16:56.400595",
+        "plate_number": "MH 12 EF 9012",
+        "camera_loc": "CAM-01 (Entry)",
+        "confidence": 77.1,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 40,
+        "timestamp": "2026-09-13 23:17:02.022108",
+        "plate_number": "MH 12 EF 9012",
+        "camera_loc": "CAM-01 (Entry)",
+        "confidence": 80.4,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 41,
+        "timestamp": "2026-09-13 23:17:06.540828",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 74.1,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 42,
+        "timestamp": "2026-09-13 23:17:12.104527",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 91.1,
+        "match_status": "Verified"
+      },
+      {
+        "id": 43,
+        "timestamp": "2026-09-13 23:17:16.620134",
+        "plate_number": "DL 4C AZ 9988",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 89.4,
+        "match_status": "Verified"
+      },
+      {
+        "id": 44,
+        "timestamp": "2026-09-13 23:17:22.174183",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 70.3,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 45,
+        "timestamp": "2026-09-13 23:17:26.752037",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 85.5,
+        "match_status": "Verified"
+      },
+      {
+        "id": 46,
+        "timestamp": "2026-09-13 23:17:32.251150",
+        "plate_number": "MH 12 EF 9012",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 98.0,
+        "match_status": "Verified"
+      },
+      {
+        "id": 47,
+        "timestamp": "2026-09-13 23:17:36.892041",
+        "plate_number": "MH 12 EF 9012",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 80.1,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 48,
+        "timestamp": "2026-09-13 23:17:42.384578",
+        "plate_number": "KA 05 XY 1122",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 92.7,
+        "match_status": "Verified"
+      },
+      {
+        "id": 49,
+        "timestamp": "2026-09-13 23:17:47.020284",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 86.2,
+        "match_status": "Verified"
+      },
+      {
+        "id": 50,
+        "timestamp": "2026-09-13 23:17:52.514203",
+        "plate_number": "KL 07 CD 5678",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 80.7,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 51,
+        "timestamp": "2026-09-13 23:17:57.153532",
+        "plate_number": "KL 07 CD 5678",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 77.2,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 52,
+        "timestamp": "2026-09-13 23:18:02.585640",
+        "plate_number": "DL 4C AZ 9988",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 80.8,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 53,
+        "timestamp": "2026-09-13 23:18:07.282176",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-01 (Entry)",
+        "confidence": 90.6,
+        "match_status": "Verified"
+      },
+      {
+        "id": 54,
+        "timestamp": "2026-09-13 23:18:12.729483",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-01 (Entry)",
+        "confidence": 98.5,
+        "match_status": "Verified"
+      },
+      {
+        "id": 55,
+        "timestamp": "2026-09-13 23:18:17.425276",
+        "plate_number": "DL 4C AZ 9988",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 75.3,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 56,
+        "timestamp": "2026-09-13 23:18:22.886309",
+        "plate_number": "MH 12 EF 9012",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 77.0,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 57,
+        "timestamp": "2026-09-13 23:18:27.509277",
+        "plate_number": "DL 4C AZ 9988",
+        "camera_loc": "CAM-01 (Entry)",
+        "confidence": 89.1,
+        "match_status": "Verified"
+      },
+      {
+        "id": 58,
+        "timestamp": "2026-09-13 23:18:32.964113",
+        "plate_number": "KA 05 XY 1122",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 86.4,
+        "match_status": "Verified"
+      },
+      {
+        "id": 59,
+        "timestamp": "2026-09-13 23:18:37.651367",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 98.3,
+        "match_status": "Verified"
+      },
+      {
+        "id": 60,
+        "timestamp": "2026-09-13 23:18:43.121345",
+        "plate_number": "MH 12 EF 9012",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 97.8,
+        "match_status": "Verified"
+      },
+      {
+        "id": 61,
+        "timestamp": "2026-09-13 23:18:47.744101",
+        "plate_number": "DL 4C AZ 9988",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 82.5,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 62,
+        "timestamp": "2026-09-13 23:18:53.273740",
+        "plate_number": "KL 07 CD 5678",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 74.2,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 63,
+        "timestamp": "2026-09-13 23:18:57.966995",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 91.6,
+        "match_status": "Verified"
+      },
+      {
+        "id": 64,
+        "timestamp": "2026-09-13 23:19:03.517695",
+        "plate_number": "MH 12 EF 9012",
+        "camera_loc": "CAM-01 (Entry)",
+        "confidence": 71.7,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 65,
+        "timestamp": "2026-09-13 23:19:08.130636",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 97.4,
+        "match_status": "Verified"
+      },
+      {
+        "id": 66,
+        "timestamp": "2026-09-13 23:19:13.598314",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 81.0,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 67,
+        "timestamp": "2026-09-13 23:19:18.261132",
+        "plate_number": "KL 07 CD 5678",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 93.1,
+        "match_status": "Verified"
+      },
+      {
+        "id": 68,
+        "timestamp": "2026-09-13 23:19:19.278999",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 92.6,
+        "match_status": "Verified"
+      },
+      {
+        "id": 69,
+        "timestamp": "2026-09-13 23:19:23.670340",
+        "plate_number": "KA 05 XY 1122",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 99.5,
+        "match_status": "Verified"
+      },
+      {
+        "id": 70,
+        "timestamp": "2026-09-13 23:19:28.339197",
+        "plate_number": "MH 12 EF 9012",
+        "camera_loc": "CAM-01 (Entry)",
+        "confidence": 88.8,
+        "match_status": "Verified"
+      },
+      {
+        "id": 71,
+        "timestamp": "2026-09-13 23:19:29.371894",
+        "plate_number": "KA 05 XY 1122",
+        "camera_loc": "CAM-01 (Entry)",
+        "confidence": 81.1,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 72,
+        "timestamp": "2026-09-13 23:19:33.804982",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 99.9,
+        "match_status": "Verified"
+      },
+      {
+        "id": 73,
+        "timestamp": "2026-09-13 23:19:38.516459",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 74.5,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 74,
+        "timestamp": "2026-09-13 23:19:39.463271",
+        "plate_number": "MH 12 EF 9012",
+        "camera_loc": "CAM-01 (Entry)",
+        "confidence": 81.1,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 75,
+        "timestamp": "2026-09-13 23:19:43.878245",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 97.4,
+        "match_status": "Verified"
+      },
+      {
+        "id": 76,
+        "timestamp": "2026-09-13 23:19:45.435787",
+        "plate_number": "KA 05 XY 1122",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 85.0,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 77,
+        "timestamp": "2026-09-13 23:19:48.611573",
+        "plate_number": "KA 05 XY 1122",
+        "camera_loc": "CAM-01 (Entry)",
+        "confidence": 90.6,
+        "match_status": "Verified"
+      },
+      {
+        "id": 78,
+        "timestamp": "2026-09-13 23:19:49.545757",
+        "plate_number": "KA 05 XY 1122",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 99.8,
+        "match_status": "Verified"
+      },
+      {
+        "id": 79,
+        "timestamp": "2026-09-13 23:19:54.024282",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 82.8,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 80,
+        "timestamp": "2026-09-13 23:19:58.682444",
+        "plate_number": "KL 07 CD 5678",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 93.7,
+        "match_status": "Verified"
+      },
+      {
+        "id": 81,
+        "timestamp": "2026-09-13 23:19:59.615966",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 87.4,
+        "match_status": "Verified"
+      },
+      {
+        "id": 82,
+        "timestamp": "2026-09-13 23:20:04.096149",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 93.9,
+        "match_status": "Verified"
+      },
+      {
+        "id": 83,
+        "timestamp": "2026-09-13 23:20:08.828687",
+        "plate_number": "KA 05 XY 1122",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 97.5,
+        "match_status": "Verified"
+      },
+      {
+        "id": 84,
+        "timestamp": "2026-09-13 23:20:09.775548",
+        "plate_number": "KA 05 XY 1122",
+        "camera_loc": "CAM-01 (Entry)",
+        "confidence": 82.8,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 85,
+        "timestamp": "2026-09-13 23:20:14.184840",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 92.3,
+        "match_status": "Verified"
+      },
+      {
+        "id": 86,
+        "timestamp": "2026-09-13 23:20:18.909166",
+        "plate_number": "KL 07 CD 5678",
+        "camera_loc": "CAM-01 (Entry)",
+        "confidence": 71.8,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 87,
+        "timestamp": "2026-09-13 23:20:19.861542",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 71.5,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 88,
+        "timestamp": "2026-09-13 23:20:24.270765",
+        "plate_number": "KA 05 XY 1122",
+        "camera_loc": "CAM-01 (Entry)",
+        "confidence": 88.1,
+        "match_status": "Verified"
+      },
+      {
+        "id": 89,
+        "timestamp": "2026-09-13 23:20:28.976051",
+        "plate_number": "DL 4C AZ 9988",
+        "camera_loc": "CAM-01 (Entry)",
+        "confidence": 95.9,
+        "match_status": "Verified"
+      },
+      {
+        "id": 90,
+        "timestamp": "2026-09-13 23:20:29.953861",
+        "plate_number": "DL 4C AZ 9988",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 90.1,
+        "match_status": "Verified"
+      },
+      {
+        "id": 91,
+        "timestamp": "2026-09-13 23:20:34.411455",
+        "plate_number": "KA 05 XY 1122",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 82.7,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 92,
+        "timestamp": "2026-09-13 23:20:39.046129",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 99.8,
+        "match_status": "Verified"
+      },
+      {
+        "id": 93,
+        "timestamp": "2026-09-13 23:20:40.037014",
+        "plate_number": "MH 12 EF 9012",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 74.2,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 94,
+        "timestamp": "2026-09-13 23:20:44.533869",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 89.7,
+        "match_status": "Verified"
+      },
+      {
+        "id": 95,
+        "timestamp": "2026-09-13 23:20:49.178210",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 82.8,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 96,
+        "timestamp": "2026-09-13 23:20:50.106167",
+        "plate_number": "KA 05 XY 1122",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 81.7,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 97,
+        "timestamp": "2026-09-13 23:20:54.597930",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-04 (Perimeter)",
+        "confidence": 72.9,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 98,
+        "timestamp": "2026-09-13 23:20:59.309816",
+        "plate_number": "KL 07 CD 5678",
+        "camera_loc": "CAM-03 (Bay A)",
+        "confidence": 73.1,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 99,
+        "timestamp": "2026-09-13 23:21:00.177242",
+        "plate_number": "UNKNOWN",
+        "camera_loc": "CAM-02 (Exit)",
+        "confidence": 72.2,
+        "match_status": "Unverified"
+      },
+      {
+        "id": 100,
+        "timestamp": "2026-10-20 16:43:40.085763",
+        "plate_number": "TN 01 AN 2345",
+        "camera_loc": "CAM-02",
+        "confidence": 96.4,
+        "match_status": "Verified"
+      },
+      {
+        "id": 101,
+        "timestamp": "2026-10-20 16:52:22.287966",
+        "plate_number": "TN 38 N 456",
+        "camera_loc": "CCTV-01 (Bay Area)",
+        "confidence": 89.3,
+        "match_status": "Verified"
+      },
+      {
+        "id": 102,
+        "timestamp": "2026-10-21 05:17:22.852338",
+        "plate_number": "TN 38 N 456",
+        "camera_loc": "CCTV-01 (Bay Area)",
+        "confidence": 89.3,
+        "match_status": "Verified"
+      },
+      {
+        "id": 103,
+        "timestamp": "2026-10-21 06:01:32.687460",
+        "plate_number": "TN 01 AN 2345",
+        "camera_loc": "CAM-01 (B02)",
+        "confidence": 71.5,
+        "match_status": "Verified"
+      },
+      {
+        "id": 104,
+        "timestamp": "2026-10-21 06:14:47.306591",
+        "plate_number": "TN 02 XY 9876",
+        "camera_loc": "CAM-01 (B04)",
+        "confidence": 67.7,
+        "match_status": "Verified"
+      },
+      {
+        "id": 105,
+        "timestamp": "2026-10-21 06:25:39.165099",
+        "plate_number": "TN 01 AB 1234",
+        "camera_loc": "CAM-01 (B01)",
+        "confidence": 59.1,
+        "match_status": "Verified"
+      }
+    ],
+    "events": [
+      {
+        "id": 1,
+        "timestamp": "2026-09-13 22:13:49",
+        "title": "BUS DETECTED",
+        "description": "TN 01 AN 2345, Bay 12",
+        "event_type": "primary"
+      },
+      {
+        "id": 2,
+        "timestamp": "2026-09-13 22:10:49",
+        "title": "ANPR",
+        "description": "TN 01 AP 1284, 96% Match",
+        "event_type": "secondary"
+      },
+      {
+        "id": 3,
+        "timestamp": "2026-09-13 22:07:49",
+        "title": "\u26a0 ALERT",
+        "description": "Camera 04 offline in Zone B",
+        "event_type": "error"
+      },
+      {
+        "id": 4,
+        "timestamp": "2026-09-13 22:00:49",
+        "title": "BUS DEPARTED",
+        "description": "TN 05 XY 7788, Bay 02",
+        "event_type": "primary"
+      },
+      {
+        "id": 5,
+        "timestamp": "2026-10-20 16:43:40.085763",
+        "title": "Bus Docked \u2022 B02",
+        "description": "Bus TN 01 AN 2345 docked at Bay B02 (AI Conf: 96%)",
+        "event_type": "primary"
+      },
+      {
+        "id": 6,
+        "timestamp": "2026-10-20 16:52:22.281646",
+        "title": "Bus Docked - B03",
+        "description": "Bus TN 38 N 456 docked at Bay B03 (AI Conf: 89%)",
+        "event_type": "primary"
+      },
+      {
+        "id": 7,
+        "timestamp": "2026-10-21 05:17:22.841318",
+        "title": "Bus Docked - B03",
+        "description": "Bus TN 38 N 456 docked at Bay B03 (AI Conf: 89%)",
+        "event_type": "primary"
+      },
+      {
+        "id": 8,
+        "timestamp": "2026-10-21 05:47:20.975236",
+        "title": "Bus Docked - B01",
+        "description": "Bus UNKNOWN docked at Bay B01 (AI Conf: 94%)",
+        "event_type": "primary"
+      },
+      {
+        "id": 9,
+        "timestamp": "2026-10-21 06:01:32.678179",
+        "title": "Bus Docked - B02",
+        "description": "Bus TN 01 AN 2345 docked at Bay B02 (AI Conf: 71%)",
+        "event_type": "primary"
+      },
+      {
+        "id": 10,
+        "timestamp": "2026-10-21 06:14:47.297259",
+        "title": "Bus Docked - B04",
+        "description": "Bus TN 02 XY 9876 docked at Bay B04 (AI Conf: 67%)",
+        "event_type": "primary"
+      },
+      {
+        "id": 11,
+        "timestamp": "2026-10-21 06:14:47.318078",
+        "title": "AI Vision: TN 02 XY 9876 Docked",
+        "description": "YOLOv11 verified vehicle at Bay B04 \u2022 ANPR Match 67.7%",
+        "event_type": "primary"
+      },
+      {
+        "id": 12,
+        "timestamp": "2026-10-21 06:25:39.154014",
+        "title": "Bus Docked - B01",
+        "description": "Bus TN 01 AB 1234 docked at Bay B01 (AI Conf: 59%)",
+        "event_type": "primary"
+      },
+      {
+        "id": 13,
+        "timestamp": "2026-10-21 06:25:39.175263",
+        "title": "AI Vision: TN 01 AB 1234 Docked",
+        "description": "YOLOv11 verified vehicle at Bay B01 \u2022 ANPR Match 59.1%",
+        "event_type": "primary"
+      }
+    ]
+  }
+}

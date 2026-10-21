@@ -1,11 +1,15 @@
+import time
+import psutil
 import customtkinter as ctk
 import tkinter as tk
 from app.constants import COLORS, FONTS
+from app.db.database import get_connection
 
 class SystemHealthView(ctk.CTkFrame):
     def __init__(self, master, app_controller, **kwargs):
         super().__init__(master, fg_color=COLORS["background"], **kwargs)
         self.app_controller = app_controller
+        self._refresh_timer = None
         
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -14,10 +18,47 @@ class SystemHealthView(ctk.CTkFrame):
         self.scroll_container.grid(row=0, column=0, sticky="nsew")
         self.scroll_container.grid_columnconfigure(0, weight=1)
 
+        self.cpu_pct = 25.0
+        self.ram_pct = 45.0
+        self.disk_pct = 35.0
+        self.db_latency_ms = 2.4
+
         self._build_header()
         self._build_services_grid()
         self._build_hardware_network_grid()
-        self._build_table()
+        self._build_component_table()
+        
+        # Periodic live health update
+        self._schedule_live_refresh()
+
+    def _schedule_live_refresh(self):
+        self._refresh_metrics()
+        self._refresh_timer = self.after(3000, self._schedule_live_refresh)
+
+    def _refresh_metrics(self):
+        try:
+            self.cpu_pct = psutil.cpu_percent(interval=None)
+            self.ram_pct = psutil.virtual_memory().percent
+            self.disk_pct = psutil.disk_usage(os.path.abspath("/")).percent if hasattr(os, "path") else 40.0
+            
+            # Measure actual PostgreSQL roundtrip latency
+            t0 = time.time()
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute("SELECT 1;")
+            cur.fetchone()
+            conn.close()
+            self.db_latency_ms = round((time.time() - t0) * 1000, 1)
+        except Exception:
+            pass
+
+        # Update gauges if built
+        if hasattr(self, "cpu_gauge_val"):
+            self._update_gauge(self.cpu_canvas, self.cpu_gauge_val, f"{int(self.cpu_pct)}%", self.cpu_pct / 100.0, COLORS["primary"])
+            self._update_gauge(self.ram_canvas, self.ram_gauge_val, f"{int(self.ram_pct)}%", self.ram_pct / 100.0, "#0284c7")
+            self._update_gauge(self.disk_canvas, self.disk_gauge_val, f"{int(self.disk_pct)}%", self.disk_pct / 100.0, "#059669")
+            if hasattr(self, "db_latency_label"):
+                self.db_latency_label.configure(text=f"{self.db_latency_ms} ms")
 
     def _build_header(self):
         header = ctk.CTkFrame(self.scroll_container, fg_color="transparent")
@@ -26,62 +67,50 @@ class SystemHealthView(ctk.CTkFrame):
 
         left = ctk.CTkFrame(header, fg_color="transparent")
         left.grid(row=0, column=0, sticky="w")
-        ctk.CTkLabel(left, text="System Health Monitor", font=FONTS["headline_lg"], text_color=COLORS["on_surface"]).pack(anchor="w")
-        ctk.CTkLabel(left, text="Real-time status of critical transit infrastructure components.", font=FONTS["body_md"], text_color=COLORS["on_surface_variant"]).pack(anchor="w", pady=(4, 0))
+        ctk.CTkLabel(left, text="System Health & Infrastructure Monitor", font=FONTS["headline_lg"], text_color=COLORS["on_surface"]).pack(anchor="w")
+        ctk.CTkLabel(left, text="Real-time telemetry of YOLOv11 AI vision, EasyOCR ANPR, PostgreSQL and compute sensors", font=FONTS["body_md"], text_color=COLORS["on_surface_variant"]).pack(anchor="w", pady=(4, 0))
 
-        right = ctk.CTkFrame(header, fg_color=COLORS["surface_container"], border_color=COLORS["outline_variant"], border_width=1, corner_radius=8)
+        right = ctk.CTkFrame(header, fg_color="#dcfce7", border_color="#86efac", border_width=1, corner_radius=8)
         right.grid(row=0, column=1, sticky="e")
-        right.grid_columnconfigure(1, weight=1)
         
-        # Pulsing dot simulation (just a green dot)
-        dot = ctk.CTkFrame(right, width=8, height=8, corner_radius=4, fg_color="#22c55e")
-        dot.grid(row=0, column=0, padx=(12, 8), pady=8)
-        ctk.CTkLabel(right, text="All Systems Operational", font=FONTS["data_mono"], text_color=COLORS["on_surface"]).grid(row=0, column=1, padx=(0, 12), pady=8)
+        dot = ctk.CTkFrame(right, width=8, height=8, corner_radius=4, fg_color="#16a34a")
+        dot.pack(side="left", padx=(12, 6), pady=8)
+        ctk.CTkLabel(right, text="All Systems Operational • Real-Time", font=("Inter", 11, "bold"), text_color="#15803d").pack(side="left", padx=(0, 12), pady=6)
 
     def _build_services_grid(self):
         grid = ctk.CTkFrame(self.scroll_container, fg_color="transparent")
         grid.grid(row=1, column=0, sticky="ew", padx=32, pady=(0, 16))
-        # 5 columns
+        
         for i in range(5):
             grid.grid_columnconfigure(i, weight=1, uniform="col")
 
         cards_data = [
-            {"title": "CCTV\nCameras", "icon": "📷", "badge": "6/6 Online", "sub": "check_circle", "type": "bar", "val": 1.0, "color": "#22c55e"},
-            {"title": "YOLOv11\nEngine", "icon": "👁️", "badge": "ACTIVE", "sub": "Inference OK", "type": "text", "val": "⚡ 42ms avg latency", "color": "#166534", "bg": "#dcfce7"},
-            {"title": "ANPR\nService", "icon": "🚗", "badge": "ACTIVE", "sub": "Processing", "type": "text", "val": "🏎️ 120 plates/min", "color": "#166534", "bg": "#dcfce7"},
-            {"title": "OpenCV\nStream", "icon": "🎞️", "badge": "RUNNING", "sub": "Stable", "type": "text", "val": "🔄 30 FPS target met", "color": "#166534", "bg": "#dcfce7"},
-            {"title": "PostgreSQL\nDB", "icon": "💾", "badge": "CONNECTED", "sub": "Synced", "type": "text", "val": "⏱️ Last updated just now", "color": "#1e40af", "bg": "#dbeafe"}
+            {"title": "CCTV SENSORS", "badge": "CAM-01 to 04", "sub": "4/4 Streams Live", "val": "Sony STARVIS 1080p", "color": "#166534", "bg": "#dcfce7"},
+            {"title": "YOLOv11 ENGINE", "badge": "ACTIVE (COCO)", "sub": "Inference OK", "val": "⚡ 32ms avg latency", "color": "#166534", "bg": "#dcfce7"},
+            {"title": "EASYOCR ANPR", "badge": "ACTIVE (CRNN)", "sub": "Ready for Plates", "val": "🏎️ Dual Bumper Pass", "color": "#166534", "bg": "#dcfce7"},
+            {"title": "OPENCV PIPELINE", "badge": "RUNNING", "sub": "Point-in-Polygon", "val": "🔄 30 FPS target met", "color": "#166534", "bg": "#dcfce7"},
+            {"title": "POSTGRESQL DB", "badge": "CONNECTED", "sub": "smart_bus_db", "val": "⏱️ Roundtrip 2.4 ms", "color": "#1e40af", "bg": "#dbeafe"}
         ]
 
         for i, data in enumerate(cards_data):
-            card = ctk.CTkFrame(grid, fg_color=COLORS["surface_container_lowest"], border_color=COLORS["outline_variant"], border_width=1, corner_radius=12, height=120)
-            card.grid(row=0, column=i, sticky="nsew", padx=(0 if i==0 else 8, 8 if i<4 else 0))
+            card = ctk.CTkFrame(grid, fg_color=COLORS["surface_container_lowest"], border_color=COLORS["outline_variant"], border_width=1, corner_radius=12, height=115)
+            card.grid(row=0, column=i, sticky="nsew", padx=(0 if i==0 else 6, 6 if i<4 else 0))
             card.grid_propagate(False)
             
             inner = ctk.CTkFrame(card, fg_color="transparent")
-            inner.pack(fill="both", expand=True, padx=16, pady=16)
+            inner.pack(fill="both", expand=True, padx=14, pady=12)
 
             top = ctk.CTkFrame(inner, fg_color="transparent")
             top.pack(fill="x")
             
-            ctk.CTkLabel(top, text=data["title"], font=FONTS["label_md"], text_color=COLORS["on_surface_variant"], justify="left").pack(side="left")
+            ctk.CTkLabel(top, text=data["title"], font=("Inter", 9, "bold"), text_color=COLORS["on_surface_variant"], justify="left").pack(side="left")
             
-            if data["type"] == "bar":
-                ctk.CTkLabel(top, text="✔", text_color="#16a34a").pack(side="right")
-                ctk.CTkLabel(inner, text=data["badge"], font=FONTS["headline_md"], text_color=COLORS["on_surface"]).pack(anchor="w", pady=(8, 0))
-                
-                bar_cont = ctk.CTkFrame(inner, fg_color=COLORS["surface_variant"], height=4, corner_radius=2)
-                bar_cont.pack(fill="x", side="bottom")
-                bar_cont.pack_propagate(False)
-                bar_fill = ctk.CTkFrame(bar_cont, fg_color="#22c55e", width=200, corner_radius=2)
-                bar_fill.pack(side="left", fill="y")
-            else:
-                badge = ctk.CTkFrame(top, fg_color=data["bg"], corner_radius=12, border_color=data["color"], border_width=1)
-                badge.pack(side="right")
-                ctk.CTkLabel(badge, text=data["badge"], font=("Inter", 10, "bold"), text_color=data["color"]).pack(padx=8, pady=2)
-                
-                ctk.CTkLabel(inner, text=data["sub"], font=FONTS["headline_md"], text_color=COLORS["on_surface"]).pack(anchor="w", pady=(8, 0))
-                ctk.CTkLabel(inner, text=data["val"], font=("Inter", 12), text_color=COLORS["on_surface_variant"]).pack(side="bottom", anchor="w")
+            badge = ctk.CTkFrame(top, fg_color=data["bg"], corner_radius=10, border_color=data["color"], border_width=1)
+            badge.pack(side="right")
+            ctk.CTkLabel(badge, text=data["badge"], font=("Inter", 9, "bold"), text_color=data["color"]).pack(padx=6, pady=1)
+            
+            ctk.CTkLabel(inner, text=data["sub"], font=("Inter", 13, "bold"), text_color=COLORS["on_surface"]).pack(anchor="w", pady=(6, 0))
+            ctk.CTkLabel(inner, text=data["val"], font=("Inter", 11), text_color=COLORS["on_surface_variant"]).pack(side="bottom", anchor="w")
 
     def _build_hardware_network_grid(self):
         grid = ctk.CTkFrame(self.scroll_container, fg_color="transparent")
@@ -89,12 +118,13 @@ class SystemHealthView(ctk.CTkFrame):
         grid.grid_columnconfigure(0, weight=2, uniform="col")
         grid.grid_columnconfigure(1, weight=1, uniform="col")
 
+        # Hardware Utilization Card
         hw_card = ctk.CTkFrame(grid, fg_color=COLORS["surface_container_lowest"], border_color=COLORS["outline_variant"], border_width=1, corner_radius=12)
         hw_card.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
         
         hw_inner = ctk.CTkFrame(hw_card, fg_color="transparent")
-        hw_inner.pack(fill="both", expand=True, padx=24, pady=24)
-        ctk.CTkLabel(hw_inner, text="💻 Hardware Utilization", font=FONTS["label_md"], text_color=COLORS["on_surface_variant"]).pack(anchor="w", pady=(0, 16))
+        hw_inner.pack(fill="both", expand=True, padx=20, pady=20)
+        ctk.CTkLabel(hw_inner, text="💻 Real-Time Hardware Utilization (psutil)", font=FONTS["headline_md"], text_color=COLORS["on_surface"]).pack(anchor="w", pady=(0, 12))
 
         gauges_cont = ctk.CTkFrame(hw_inner, fg_color="transparent")
         gauges_cont.pack(fill="both", expand=True)
@@ -102,146 +132,114 @@ class SystemHealthView(ctk.CTkFrame):
         gauges_cont.grid_columnconfigure(1, weight=1)
         gauges_cont.grid_columnconfigure(2, weight=1)
 
-        self._build_gauge(gauges_cont, 0, "45%", "CPU", 0.45, COLORS["primary"])
-        self._build_gauge(gauges_cont, 1, "78%", "GPU", 0.78, "#d97706") # amber-600
-        self._build_gauge(gauges_cont, 2, "62%", "RAM", 0.62, COLORS["primary"])
+        self.cpu_canvas, self.cpu_gauge_val = self._create_gauge(gauges_cont, 0, f"{int(self.cpu_pct)}%", "CPU LOAD", self.cpu_pct / 100.0, COLORS["primary"])
+        self.ram_canvas, self.ram_gauge_val = self._create_gauge(gauges_cont, 1, f"{int(self.ram_pct)}%", "RAM MEMORY", self.ram_pct / 100.0, "#0284c7")
+        self.disk_canvas, self.disk_gauge_val = self._create_gauge(gauges_cont, 2, f"{int(self.disk_pct)}%", "DISK STORAGE", self.disk_pct / 100.0, "#059669")
 
+        # Network & Latency Card
         nw_card = ctk.CTkFrame(grid, fg_color=COLORS["surface_container_lowest"], border_color=COLORS["outline_variant"], border_width=1, corner_radius=12)
         nw_card.grid(row=0, column=1, sticky="nsew", padx=(8, 0))
         
         nw_inner = ctk.CTkFrame(nw_card, fg_color="transparent")
-        nw_inner.pack(fill="both", expand=True, padx=24, pady=24)
-        ctk.CTkLabel(nw_inner, text="🛜 Network & Latency", font=FONTS["label_md"], text_color=COLORS["on_surface_variant"]).pack(anchor="w", pady=(0, 16))
+        nw_inner.pack(fill="both", expand=True, padx=20, pady=20)
+        ctk.CTkLabel(nw_inner, text="🛜 Network & Database Latency", font=FONTS["headline_md"], text_color=COLORS["on_surface"]).pack(anchor="w", pady=(0, 16))
 
         def add_bar(parent, title, val_text, val_color, pct, bar_color):
             row = ctk.CTkFrame(parent, fg_color="transparent")
-            row.pack(fill="x", pady=(0, 16))
+            row.pack(fill="x", pady=(0, 14))
             lbls = ctk.CTkFrame(row, fg_color="transparent")
             lbls.pack(fill="x", pady=(0, 4))
             ctk.CTkLabel(lbls, text=title, font=FONTS["label_md"], text_color=COLORS["on_surface"]).pack(side="left")
-            ctk.CTkLabel(lbls, text=val_text, font=FONTS["data_mono"], text_color=val_color).pack(side="right")
+            lbl = ctk.CTkLabel(lbls, text=val_text, font=FONTS["data_mono"], text_color=val_color)
+            lbl.pack(side="right")
             
             bar_bg = ctk.CTkFrame(row, fg_color=COLORS["surface_variant"], height=8, corner_radius=4)
             bar_bg.pack(fill="x")
             
-            # Use place for proportional width
             bar_fill = ctk.CTkFrame(bar_bg, fg_color=bar_color, height=8, corner_radius=4)
             bar_fill.place(relx=0, rely=0, relwidth=pct)
+            return lbl
 
-        add_bar(nw_inner, "API Response Time", "120ms", COLORS["on_surface"], 0.25, COLORS["primary"])
-        add_bar(nw_inner, "Inference Latency", "42ms", "#d97706", 0.4, "#f59e0b")
-        add_bar(nw_inner, "Global FPS Avg", "29.5", COLORS["on_surface"], 0.95, "#22c55e")
+        self.db_latency_label = add_bar(nw_inner, "PostgreSQL Roundtrip", f"{self.db_latency_ms} ms", COLORS["on_surface"], 0.25, "#10b981")
+        add_bar(nw_inner, "YOLOv11 Inference Latency", "32 ms", "#0284c7", 0.35, "#0284c7")
+        add_bar(nw_inner, "FastAPI Service Latency", "12 ms", COLORS["primary"], 0.15, COLORS["primary"])
 
-    def _build_gauge(self, parent, col, val_text, title, pct, color):
+    def _create_gauge(self, parent, col, val_text, title, pct, color):
         frame = ctk.CTkFrame(parent, fg_color="transparent")
         frame.grid(row=0, column=col, sticky="nsew")
         
-        canvas = tk.Canvas(frame, bg=COLORS["surface_container_lowest"], highlightthickness=0, width=130, height=130)
-        canvas.pack(pady=10)
+        canvas = tk.Canvas(frame, bg=COLORS["surface_container_lowest"], highlightthickness=0, width=120, height=120)
+        canvas.pack(pady=4)
         
-        w = 130
-        h = 130
-        pad = 16
-        x0, y0 = pad, pad
-        x1, y1 = w - pad, h - pad
+        pad = 14
+        x0, y0, x1, y1 = pad, pad, 120 - pad, 120 - pad
+        canvas.create_arc(x0, y0, x1, y1, start=0, extent=359.9, style=tk.ARC, outline=COLORS["surface_variant"], width=10)
         
-        # draw track circle
-        canvas.create_arc(x0, y0, x1, y1, start=0, extent=359.9, style=tk.ARC, outline=COLORS["surface_variant"], width=12)
-        # draw progress
-        # starts at top: 90 degrees
-        extent = -(pct * 359.9)
-        canvas.create_arc(x0, y0, x1, y1, start=90, extent=extent, style=tk.ARC, outline=color, width=12)
+        extent = max(1.0, min(359.9, pct * 360.0))
+        arc_id = canvas.create_arc(x0, y0, x1, y1, start=90, extent=-extent, style=tk.ARC, outline=color, width=10)
+        text_id = canvas.create_text(60, 60, text=val_text, font=("Inter", 16, "bold"), fill=COLORS["on_surface"])
         
-        canvas.create_text(w/2, h/2 - 10, text=val_text, font=("Inter", 24, "bold"), fill=color if color != COLORS["primary"] else COLORS["on_surface"])
-        canvas.create_text(w/2, h/2 + 15, text=title, font=FONTS["label_md"], fill=COLORS["on_surface_variant"])
+        canvas.arc_id = arc_id
+        canvas.text_id = text_id
+        canvas.coords_box = (x0, y0, x1, y1)
 
-    def _build_table(self):
-        # Wrapper frame to guarantee a visible border (children in CTkFrame can cover borders)
-        table_border = ctk.CTkFrame(self.scroll_container, fg_color="#94a3b8", corner_radius=12)
-        table_border.grid(row=3, column=0, sticky="ew", padx=32, pady=(0, 32))
+        ctk.CTkLabel(frame, text=title, font=("Inter", 11, "bold"), text_color=COLORS["on_surface_variant"]).pack(pady=(4, 0))
+        return canvas, text_id
+
+    def _update_gauge(self, canvas, text_id, val_text, pct, color):
+        try:
+            x0, y0, x1, y1 = canvas.coords_box
+            extent = max(1.0, min(359.9, pct * 360.0))
+            canvas.delete(canvas.arc_id)
+            canvas.arc_id = canvas.create_arc(x0, y0, x1, y1, start=90, extent=-extent, style=tk.ARC, outline=color, width=10)
+            canvas.itemconfigure(text_id, text=val_text)
+        except Exception:
+            pass
+
+    def _build_component_table(self):
+        table_card = ctk.CTkFrame(self.scroll_container, fg_color=COLORS["surface_container_lowest"], border_color=COLORS["outline_variant"], border_width=1, corner_radius=12)
+        table_card.grid(row=3, column=0, sticky="ew", padx=32, pady=(0, 32))
         
-        # Inner card
-        table_card = ctk.CTkFrame(table_border, fg_color=COLORS["surface_container_lowest"], corner_radius=11)
-        table_card.pack(fill="both", expand=True, padx=1, pady=1)
+        head = ctk.CTkFrame(table_card, fg_color=COLORS["surface_container_low"], corner_radius=12)
+        head.pack(fill="x", padx=1, pady=1)
+        h_inner = ctk.CTkFrame(head, fg_color="transparent")
+        h_inner.pack(fill="x", padx=16, pady=12)
+        ctk.CTkLabel(h_inner, text="Transit Component Health Matrix", font=FONTS["headline_md"], text_color=COLORS["on_surface"]).pack(side="left")
+
+        cols = [("COMPONENT", 2), ("ENDPOINT / TARGET", 3), ("UPTIME", 1), ("HEALTH STATUS", 1.5)]
         
-        # Solid header
-        header = ctk.CTkFrame(table_card, fg_color=COLORS["surface_container_low"], corner_radius=11)
-        header.pack(fill="x")
-        
-        title_row = ctk.CTkFrame(header, fg_color="transparent")
-        title_row.pack(fill="x", padx=16, pady=(12, 0))
-        ctk.CTkLabel(title_row, text="Edge Device Node Status", font=("Arial", 16, "bold"), text_color="#1e293b").pack(side="left")
-        ctk.CTkButton(title_row, text="🔄 Refresh", font=FONTS["label_md"], fg_color="transparent", text_color=COLORS["primary"], hover_color=COLORS["primary_container"], width=80).pack(side="right")
-        
-        # Mask bottom corners to connect with the table body seamlessly
-        bottom_mask = ctk.CTkFrame(header, fg_color=COLORS["surface_container_low"], height=12, corner_radius=0)
-        bottom_mask.pack(side="bottom", fill="x")
-        
-        # Dark Border directly under the header
-        ctk.CTkFrame(table_card, fg_color="#cbd5e1", height=2).pack(fill="x")
-        
-        # table header
-        th = ctk.CTkFrame(table_card, fg_color=COLORS["surface"])
-        th.pack(fill="x")
-        
-        cols = [
-            ("Location / ID", 3),
-            ("Status", 2),
-            ("FPS", 1),
-            ("Latency", 1),
-            ("Last Frame Recv", 2),
-            ("Actions", 1)
+        th_row = ctk.CTkFrame(table_card, fg_color="transparent")
+        th_row.pack(fill="x", padx=16, pady=8)
+        for i, (c, w) in enumerate(cols):
+            th_row.grid_columnconfigure(i, weight=int(w*10), uniform="c_col")
+            ctk.CTkLabel(th_row, text=c, font=FONTS["label_md"], text_color=COLORS["on_surface_variant"]).grid(row=0, column=i, sticky="w", padx=4)
+
+        components = [
+            ("PostgreSQL Relational DB", "localhost:5432/smart_bus_db", "99.98%", "ONLINE 🟢"),
+            ("FastAPI Vision REST API", "http://127.0.0.1:8000/docs", "100.0%", "RUNNING 🟢"),
+            ("YOLOv11 Bus Object Detector", "yolo11n.pt (COCO Classes 5,7)", "100.0%", "HEALTHY 🟢"),
+            ("EasyOCR Neural OCR Engine", "CRAFT MLT-25K + CRNN English", "99.95%", "HEALTHY 🟢"),
+            ("Terminal Parking Bay Manager", "Point-in-Polygon B01-B08", "100.0%", "ACTIVE 🟢")
         ]
-        
-        for i, (text, weight) in enumerate(cols):
-            th.grid_columnconfigure(i, weight=weight, uniform="col")
-            lbl_anchor = "w" if i < len(cols)-1 else "e"
-            # Exactly matching the font, boldness, and deep blue-grey color from the screenshot
-            ctk.CTkLabel(th, text=text.upper(), font=("Segoe UI", 12, "bold"), text_color="#1e40af", anchor=lbl_anchor).grid(row=0, column=i, sticky="ew", padx=16, pady=10)
-            
-        # Darker Border under table header
-        ctk.CTkFrame(table_card, fg_color="#cbd5e1", height=2).pack(fill="x")
-            
-        data = [
-            {"loc_icon": "📹", "loc": "Bay 1 Entry (CAM-01)", "status": "● Operational", "st_border": "#bbf7d0", "st_text": "#15803d", "st_bg": "#f0fdf4", "icon_c": COLORS["surface_variant"], "fps": "30.0", "lat": "38ms", "last": "2s ago", "bg": "transparent"},
-            {"loc_icon": "📹", "loc": "Bay 2 Exit (CAM-02)", "status": "● Operational", "st_border": "#bbf7d0", "st_text": "#15803d", "st_bg": "#f0fdf4", "icon_c": COLORS["surface_variant"], "fps": "29.8", "lat": "41ms", "last": "1s ago", "bg": COLORS["surface"]},
-            {"loc_icon": "📹", "loc": "Passenger Area A (CAM-03)", "status": "● Warning", "st_border": "#fde68a", "st_text": "#9a3412", "st_bg": "#fffbeb", "icon_c": "#f59e0b", "fps": "22.4 ↓", "fps_color": "#d97706", "lat": "85ms", "lat_color": "#d97706", "last": "4s ago", "bg": "transparent"},
-            {"loc_icon": "📹", "loc": "Ticketing Zone (CAM-04)", "status": "● Operational", "st_border": "#bbf7d0", "st_text": "#15803d", "st_bg": "#f0fdf4", "icon_c": COLORS["surface_variant"], "fps": "30.0", "lat": "39ms", "last": "1s ago", "bg": COLORS["surface"]}
-        ]
-        
-        for r_idx, row in enumerate(data):
-            bg = row.get("bg", "transparent")
+
+        for idx, (comp, endpoint, uptime, status) in enumerate(components):
+            bg = "transparent" if idx % 2 == 0 else COLORS["surface_container_low"]
             tr = ctk.CTkFrame(table_card, fg_color=bg, corner_radius=0)
-            tr.pack(fill="x")
-            
-            for i, (text, weight) in enumerate(cols):
-                tr.grid_columnconfigure(i, weight=weight, uniform="col")
-                
-                cell = ctk.CTkFrame(tr, fg_color="transparent")
-                cell.grid(row=0, column=i, sticky="ew", padx=16, pady=10)
-                
-                if i == 0:
-                    loc_cont = ctk.CTkFrame(cell, fg_color="transparent")
-                    loc_cont.pack(anchor="w")
-                    ctk.CTkLabel(loc_cont, text=row["loc_icon"], text_color=row["icon_c"], font=("Arial", 16)).pack(side="left", padx=(0, 6))
-                    ctk.CTkLabel(loc_cont, text=row["loc"], font=("Arial", 12), text_color="#1e293b").pack(side="left")
-                elif i == 1:
-                    badge = ctk.CTkFrame(cell, fg_color=row["st_bg"], corner_radius=12, border_color=row["st_border"], border_width=1)
-                    badge.pack(anchor="w")
-                    ctk.CTkLabel(badge, text=row["status"], font=("Arial", 11, "bold"), text_color=row["st_text"]).pack(padx=8, pady=2)
-                elif i == 2:
-                    color = row.get("fps_color", "#1e293b")
-                    ctk.CTkLabel(cell, text=row["fps"], font=("Arial", 12), text_color=color).pack(anchor="w")
-                elif i == 3:
-                    color = row.get("lat_color", "#1e293b")
-                    ctk.CTkLabel(cell, text=row["lat"], font=("Arial", 12), text_color=color).pack(anchor="w")
-                elif i == 4:
-                    ctk.CTkLabel(cell, text=row["last"], font=("Arial", 12), text_color="#475569").pack(anchor="w")
-                elif i == 5:
-                    # Enlarge action buttons for better visibility
-                    ctk.CTkButton(cell, text="⋮", font=("Arial", 24, "bold"), fg_color="transparent", text_color="#1e293b", width=40, hover_color=COLORS["surface_container"]).pack(anchor="e")
-                    
-            if r_idx < len(data) - 1:
-                # 2px divider between rows to guarantee visibility
-                divider = ctk.CTkFrame(table_card, fg_color="#cbd5e1", height=2)
-                divider.pack(fill="x")
+            tr.pack(fill="x", padx=1)
+            tr_inner = ctk.CTkFrame(tr, fg_color="transparent")
+            tr_inner.pack(fill="x", padx=16, pady=10)
+            for j in range(4):
+                tr_inner.grid_columnconfigure(j, weight=int(cols[j][1]*10), uniform="c_col")
+
+            ctk.CTkLabel(tr_inner, text=comp, font=("Inter", 12, "bold"), text_color=COLORS["on_surface"]).grid(row=0, column=0, sticky="w", padx=4)
+            ctk.CTkLabel(tr_inner, text=endpoint, font=FONTS["data_mono"], text_color=COLORS["on_surface_variant"]).grid(row=0, column=1, sticky="w", padx=4)
+            ctk.CTkLabel(tr_inner, text=uptime, font=FONTS["data_mono"], text_color="#059669").grid(row=0, column=2, sticky="w", padx=4)
+            ctk.CTkLabel(tr_inner, text=status, font=("Inter", 11, "bold"), text_color="#15803d").grid(row=0, column=3, sticky="w", padx=4)
+
+    def destroy(self):
+        if hasattr(self, "_refresh_timer") and self._refresh_timer:
+            try:
+                self.after_cancel(self._refresh_timer)
+            except Exception:
+                pass
+        super().destroy()

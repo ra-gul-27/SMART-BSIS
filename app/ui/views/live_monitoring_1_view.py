@@ -39,10 +39,11 @@ class CameraCard(ctk.CTkFrame):
         self.video_frame.pack(fill="both", expand=True, padx=1, pady=0)
 
         # Show CCTV visual frame if live
-        if is_live and os.path.exists("test_detection_output.jpg"):
+        preview_img = "live_cctv_annotated.jpg" if os.path.exists("live_cctv_annotated.jpg") else ("test_detection_output.jpg" if os.path.exists("test_detection_output.jpg") else None)
+        if is_live and preview_img:
             try:
                 from PIL import Image
-                img = Image.open("test_detection_output.jpg")
+                img = Image.open(preview_img)
                 ctk_img = ctk.CTkImage(light_image=img, dark_image=img, size=(480, 260))
                 thumb = ctk.CTkLabel(self.video_frame, text="", image=ctk_img)
                 thumb.place(relx=0.5, rely=0.5, anchor="center")
@@ -76,9 +77,11 @@ class CameraCard(ctk.CTkFrame):
 
         right_actions = ctk.CTkFrame(footer_content, fg_color="transparent")
         right_actions.pack(side="right")
-        self.details_btn = ctk.CTkButton(right_actions, text="Details", font=FONTS["label_md"], fg_color="transparent", border_color=COLORS["primary"], border_width=1, text_color=COLORS["primary"], hover_color=COLORS["primary_container"])
+        self.details_btn = ctk.CTkButton(
+            right_actions, text="⚡ View AI Vision & ANPR", font=FONTS["label_md"], 
+            fg_color=COLORS["primary"], text_color="#ffffff", hover_color=COLORS["primary_container"]
+        )
         self.details_btn.pack(side="left", padx=8)
-        ctk.CTkButton(right_actions, text="⚙", width=32, height=32, fg_color="transparent", text_color=COLORS["on_surface_variant"], hover_color=COLORS["surface_variant"]).pack(side="left")
 
 
 class LiveMonitoring1View(ctk.CTkScrollableFrame):

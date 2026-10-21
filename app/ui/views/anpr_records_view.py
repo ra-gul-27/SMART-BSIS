@@ -1,4 +1,6 @@
+import os
 import customtkinter as ctk
+from PIL import Image
 from app.constants import COLORS, FONTS
 from app.models.anpr_record_model import ANPRRecordModel
 
@@ -13,11 +15,16 @@ class ANPRRecordsView(ctk.CTkFrame):
         self.scroll_container.grid(row=0, column=0, sticky="nsew")
         self.scroll_container.grid_columnconfigure(0, weight=1)
 
+        self.search_var = ctk.StringVar(value="")
+        self.cam_filter_var = ctk.StringVar(value="All Cameras")
+        self.selected_record = None
+
         self._build_header()
         
         self.content_grid = ctk.CTkFrame(self.scroll_container, fg_color="transparent")
         self.content_grid.grid(row=1, column=0, sticky="nsew", padx=32, pady=16)
-        self.content_grid.grid_columnconfigure(0, weight=1)
+        self.content_grid.grid_columnconfigure(0, weight=2)
+        self.content_grid.grid_columnconfigure(1, weight=1)
         
         self._build_table_panel(self.content_grid)
         self._build_sidebar(self.content_grid)
@@ -30,22 +37,44 @@ class ANPRRecordsView(ctk.CTkFrame):
 
         left = ctk.CTkFrame(header, fg_color="transparent")
         left.grid(row=0, column=0, sticky="w")
-        ctk.CTkLabel(left, text="ANPR Records", font=FONTS["headline_lg"], text_color=COLORS["on_surface"]).pack(anchor="w")
-        ctk.CTkLabel(left, text="Monitor and verify automatic number plate recognition events.", font=FONTS["body_md"], text_color=COLORS["on_surface_variant"]).pack(anchor="w")
+        ctk.CTkLabel(left, text="ANPR Records & License Plate Log", font=FONTS["headline_lg"], text_color=COLORS["on_surface"]).pack(anchor="w")
+        ctk.CTkLabel(left, text="Monitor, verify and audit automated number plate recognition captures", font=FONTS["body_md"], text_color=COLORS["on_surface_variant"]).pack(anchor="w")
 
         right = ctk.CTkFrame(header, fg_color="transparent")
         right.grid(row=0, column=1, sticky="e", pady=(16, 0))
 
-        date_sel = ctk.CTkEntry(right, placeholder_text="📅 mm/dd/yyyy", font=FONTS["body_md"], fg_color=COLORS["surface_container_lowest"], border_color=COLORS["outline_variant"], width=140, height=40)
-        date_sel.pack(side="left", padx=(0, 12))
+        # Search plate entry
+        self.search_entry = ctk.CTkEntry(
+            right, placeholder_text="🔍 Search Plate / Cam...", textvariable=self.search_var,
+            font=FONTS["body_md"], fg_color=COLORS["surface_container_lowest"], border_color=COLORS["outline_variant"], width=170, height=38
+        )
+        self.search_entry.pack(side="left", padx=(0, 8))
+        self.search_entry.bind("<KeyRelease>", lambda e: self._populate_grid())
 
-        cam_sel = ctk.CTkOptionMenu(right, values=["All Cameras", "CAM-01 (Entry)", "CAM-02 (Exit)"], font=FONTS["body_md"], fg_color=COLORS["surface_container_lowest"], button_color=COLORS["surface_container"], button_hover_color=COLORS["outline_variant"], text_color=COLORS["on_surface"], height=40)
-        cam_sel.pack(side="left", padx=(0, 12))
+        # Camera dropdown filter
+        self.cam_dropdown = ctk.CTkOptionMenu(
+            right, values=["All Cameras", "CAM-01 (Bay B02)", "CAM-02 (Entry)", "CAM-03 (Exit)"],
+            variable=self.cam_filter_var, font=FONTS["body_md"], fg_color=COLORS["surface_container_lowest"],
+            button_color=COLORS["surface_container"], button_hover_color=COLORS["outline_variant"],
+            text_color=COLORS["on_surface"], height=38, command=lambda e: self._populate_grid()
+        )
+        self.cam_dropdown.pack(side="left", padx=(0, 8))
 
-        ctk.CTkButton(
-            right, text="📥 Export CSV", font=FONTS["label_md"], height=40,
-            fg_color=COLORS["primary"], text_color=COLORS["on_primary"], hover_color=COLORS["primary_container"]
-        ).pack(side="left")
+        # Export CSV Button
+        self.export_btn = ctk.CTkButton(
+            right, text="📥 Export CSV", font=FONTS["label_md"], height=38,
+            fg_color=COLORS["primary"], text_color=COLORS["on_primary"], hover_color=COLORS["primary_container"],
+            command=self._export_csv_action
+        )
+        self.export_btn.pack(side="left")
+
+    def _export_csv_action(self):
+        try:
+            count = ANPRRecordModel.export_csv("anpr_records_export.csv")
+            self.export_btn.configure(text=f"✔ Exported ({count})", fg_color="#10b981")
+            self.after(3000, lambda: self.export_btn.configure(text="📥 Export CSV", fg_color=COLORS["primary"]))
+        except Exception as e:
+            self.export_btn.configure(text=f"Error: {e}")
 
     def _build_table_panel(self, parent):
         table_card = ctk.CTkFrame(parent, fg_color=COLORS["surface_container_lowest"], border_color=COLORS["outline_variant"], border_width=1, corner_radius=12)
@@ -58,8 +87,8 @@ class ANPRRecordsView(ctk.CTkFrame):
         th_row.pack(fill="x", padx=16, pady=12)
 
         self.cols = [
-            ("TIMESTAMP", 1.2), ("CAMERA", 1), ("REGISTRATION", 1.5), 
-            ("MATCH/ROUTE", 1.5), ("BAY", 0.8), ("STATUS", 1)
+            ("TIMESTAMP", 1.2), ("CAMERA", 1.2), ("REGISTRATION", 1.6), 
+            ("CONFIDENCE", 1.1), ("BAY", 0.7), ("STATUS", 1.2)
         ]
         
         for i, (c, w) in enumerate(self.cols):
@@ -90,42 +119,37 @@ class ANPRRecordsView(ctk.CTkFrame):
         tfoot_content = ctk.CTkFrame(tfoot, fg_color="transparent")
         tfoot_content.pack(fill="x", padx=16, pady=(4, 12))
 
-        ctk.CTkLabel(tfoot_content, text="Showing 1 to 24 of 1,204 entries", font=("Inter", 12), text_color=COLORS["on_surface_variant"]).pack(side="left")
-        
-        pag_wrapper = ctk.CTkFrame(tfoot_content, fg_color="transparent")
-        pag_wrapper.pack(side="right")
-        
-        for p in ["Prev", "1", "2", "3", "4", "5", "Next"]:
-            is_active = (p == "1")
-            fg = COLORS["primary"] if is_active else "transparent"
-            tc = COLORS["on_primary"] if is_active else COLORS["on_surface_variant"]
-            border = 0 if is_active else 1
-            ctk.CTkButton(
-                pag_wrapper, text=p, width=32, height=28, font=("Inter", 12), 
-                fg_color=fg, text_color=tc, border_color=COLORS["outline_variant"], border_width=border,
-                hover_color=COLORS["surface_container"]
-            ).pack(side="left", padx=2)
+        self.footer_count = ctk.CTkLabel(tfoot_content, text="Loading entries...", font=("Inter", 12), text_color=COLORS["on_surface_variant"])
+        self.footer_count.pack(side="left")
 
     def _populate_grid(self):
         for widget in self.grid_container.winfo_children():
             widget.destroy()
 
-        records = ANPRRecordModel.get_all_records()
+        cam_f = self.cam_filter_var.get()
+        search_f = self.search_var.get().strip()
+        records = ANPRRecordModel.get_all_records(camera_filter=cam_f, search_term=search_f)
+
+        if hasattr(self, "footer_count"):
+            self.footer_count.configure(text=f"Showing {len(records)} verified license plate captures")
+
+        if records and self.selected_record is None:
+            self.selected_record = records[0]
 
         for i, row in enumerate(records):
             is_verified = (row["match_status"] == "Verified")
             s_bg = "#d1fae5" if is_verified else "#fee2e2"
             s_fg = "#059669" if is_verified else COLORS["error"]
-            reg_col = COLORS["on_surface"] if is_verified else COLORS["error"]
-            bg_color = "transparent" if i % 2 == 0 else COLORS["surface_container"]
-            if not is_verified:
-                bg_color = COLORS["surface_bright"]
-                
-            tr = ctk.CTkFrame(self.grid_container, fg_color=bg_color, corner_radius=0)
+            reg_col = "#0284c7" if is_verified else COLORS["error"]
+            
+            is_selected = self.selected_record and self.selected_record["id"] == row["id"]
+            bg_color = "#f0f9ff" if is_selected else ("transparent" if i % 2 == 0 else COLORS["surface_container_low"])
+            
+            tr = ctk.CTkFrame(self.grid_container, fg_color=bg_color, corner_radius=0, cursor="hand2")
             tr.pack(fill="x", padx=1)
             
             tr_content = ctk.CTkFrame(tr, fg_color="transparent")
-            tr_content.pack(fill="x", padx=16, pady=12)
+            tr_content.pack(fill="x", padx=16, pady=10)
             
             for j, (c, w) in enumerate(self.cols):
                 tr_content.grid_columnconfigure(j, weight=int(w*10), uniform="col")
@@ -133,7 +157,6 @@ class ANPRRecordsView(ctk.CTkFrame):
             # Col 1: Timestamp
             c1 = ctk.CTkFrame(tr_content, fg_color="transparent")
             c1.grid(row=0, column=0, sticky="ew", padx=4)
-            # Format timestamp for UI
             ui_time = row["timestamp"].split(" ")[1] if " " in row["timestamp"] else row["timestamp"]
             ctk.CTkLabel(c1, text=ui_time, font=FONTS["data_mono"], text_color=COLORS["on_surface"]).pack(anchor="w")
 
@@ -145,18 +168,17 @@ class ANPRRecordsView(ctk.CTkFrame):
             # Col 3: Registration
             c3 = ctk.CTkFrame(tr_content, fg_color="transparent")
             c3.grid(row=0, column=2, sticky="ew", padx=4)
-            ctk.CTkLabel(c3, text=row["plate_number"], font=("Inter", 14, "bold"), text_color=reg_col).pack(anchor="w")
+            ctk.CTkLabel(c3, text=row["plate_number"], font=("Inter", 13, "bold"), text_color=reg_col).pack(anchor="w")
 
-            # Col 4: Match/Route
+            # Col 4: Confidence
             c4 = ctk.CTkFrame(tr_content, fg_color="transparent")
             c4.grid(row=0, column=3, sticky="ew", padx=4)
-            route = f"Confidence: {row['confidence']}%"
-            ctk.CTkLabel(c4, text=route, font=FONTS["body_md"], text_color=COLORS["on_surface"] if is_verified else COLORS["on_surface_variant"]).pack(anchor="w")
+            ctk.CTkLabel(c4, text=f"{row['confidence']}%", font=FONTS["data_mono"], text_color="#10b981" if is_verified else "#f59e0b").pack(anchor="w")
 
             # Col 5: Bay
             c5 = ctk.CTkFrame(tr_content, fg_color="transparent")
             c5.grid(row=0, column=4, sticky="ew", padx=4)
-            ctk.CTkLabel(c5, text="--", font=FONTS["data_mono"], text_color=COLORS["on_surface_variant"]).pack(anchor="w")
+            ctk.CTkLabel(c5, text=row["bay"], font=FONTS["data_mono"], text_color=COLORS["primary"]).pack(anchor="w")
 
             # Col 6: Status
             c6 = ctk.CTkFrame(tr_content, fg_color="transparent")
@@ -166,40 +188,76 @@ class ANPRRecordsView(ctk.CTkFrame):
             icon = "✓" if is_verified else "⚠"
             ctk.CTkLabel(s_badge, text=f"{icon} {row['match_status']}", text_color=s_fg, font=("Inter", 10, "bold")).pack(padx=8, pady=2)
 
+            # Bind row click to inspect
+            def on_row_click(e, rec=row):
+                self.selected_record = rec
+                self._populate_grid()
+                self._build_sidebar(self.content_grid)
+
+            tr.bind("<Button-1>", on_row_click)
+            tr_content.bind("<Button-1>", on_row_click)
+            for child in tr_content.winfo_children():
+                child.bind("<Button-1>", on_row_click)
+                for grandchild in child.winfo_children():
+                    grandchild.bind("<Button-1>", on_row_click)
+
             if i < len(records) - 1:
                 border = ctk.CTkFrame(self.grid_container, fg_color=COLORS["outline_variant"], height=1)
                 border.pack(fill="x", padx=1)
 
     def _build_sidebar(self, parent):
-        side_panel = ctk.CTkFrame(parent, fg_color=COLORS["surface_container_lowest"], border_color=COLORS["outline_variant"], border_width=1, corner_radius=12, width=360)
-        side_panel.grid(row=0, column=1, sticky="nsew")
-        side_panel.grid_propagate(False)
+        if hasattr(self, "side_panel_frame") and self.side_panel_frame is not None:
+            self.side_panel_frame.destroy()
+
+        self.side_panel_frame = ctk.CTkFrame(parent, fg_color=COLORS["surface_container_lowest"], border_color=COLORS["outline_variant"], border_width=1, corner_radius=12)
+        self.side_panel_frame.grid(row=0, column=1, sticky="nsew")
+
+        rec = self.selected_record
+        plate = rec["plate_number"] if rec else "TN 01 AN 2345"
+        rec_id = f"ANP-{rec['id']}" if rec else "ANP-101"
+        conf = rec["confidence"] if rec else 94.2
+        camera = rec["camera_loc"] if rec else "CAM-01 (Bay B02)"
+        bay = rec["bay"] if rec else "B02"
+        b_type = rec["bus_type"] if rec else "AC Volvo Express"
+        driver = rec["driver"] if rec else "Kannan P"
+        dest = rec["dest"] if rec else "Bangalore Shantinagar"
 
         # Header
-        head = ctk.CTkFrame(side_panel, fg_color=COLORS["surface_container_low"], corner_radius=12)
+        head = ctk.CTkFrame(self.side_panel_frame, fg_color=COLORS["surface_container_low"], corner_radius=12)
         head.pack(fill="x", padx=1, pady=1)
         h_inner = ctk.CTkFrame(head, fg_color="transparent")
-        h_inner.pack(fill="x", padx=16, pady=16)
-        ctk.CTkLabel(h_inner, text="Capture Details", font=FONTS["headline_md"], text_color=COLORS["on_surface"]).pack(side="left")
+        h_inner.pack(fill="x", padx=16, pady=14)
+        ctk.CTkLabel(h_inner, text="Capture Telemetry & Plate", font=FONTS["headline_md"], text_color=COLORS["on_surface"]).pack(side="left")
         
-        badge = ctk.CTkFrame(h_inner, fg_color=COLORS["surface_variant"], corner_radius=4)
+        badge = ctk.CTkFrame(h_inner, fg_color="#e0f2fe", corner_radius=4)
         badge.pack(side="right")
-        ctk.CTkLabel(badge, text="ID: ANP-8842", text_color=COLORS["on_surface_variant"], font=FONTS["data_mono"]).pack(padx=8, pady=2)
+        ctk.CTkLabel(badge, text=rec_id, text_color="#0284c7", font=("Inter", 11, "bold")).pack(padx=8, pady=2)
 
         # Scrollable Content
-        body = ctk.CTkScrollableFrame(side_panel, fg_color="transparent")
+        body = ctk.CTkScrollableFrame(self.side_panel_frame, fg_color="transparent")
         body.pack(fill="both", expand=True, padx=16, pady=16)
 
         # Image Container
-        img_box = ctk.CTkFrame(body, fg_color="#213145", border_color=COLORS["outline_variant"], border_width=1, corner_radius=8, height=180)
+        img_box = ctk.CTkFrame(body, fg_color="#090d16", border_color=COLORS["outline_variant"], border_width=1, corner_radius=8, height=180)
         img_box.pack(fill="x", pady=(0, 16))
         img_box.pack_propagate(False)
         
-        ctk.CTkLabel(img_box, text="[ Captured Bus Plate Image ]", text_color=COLORS["outline"], font=FONTS["label_md"]).place(relx=0.5, rely=0.4, anchor="center")
-        
-        ocr_box = ctk.CTkFrame(img_box, fg_color="#3B82F6", border_color="white", border_width=1, corner_radius=4)
-        ocr_box.place(relx=0.5, rely=0.8, anchor="center")
-        ctk.CTkLabel(ocr_box, text="TN 01 AB 1234", font=("Inter", 16, "bold"), text_color="white").pack(padx=12, pady=4)
+        img_lbl = ctk.CTkLabel(img_box, text="")
+        img_lbl.place(relx=0.5, rely=0.45, anchor="center")
+
+        img_cand = "live_cctv_annotated.jpg" if os.path.exists("live_cctv_annotated.jpg") else "real_bus_sample.jpg"
+        if os.path.exists(img_cand):
+            try:
+                pil_img = Image.open(img_cand)
+                ctk_img = ctk.CTkImage(light_image=pil_img, dark_image=pil_img, size=(280, 150))
+                img_lbl.configure(image=ctk_img)
+            except Exception:
+                img_lbl.configure(text="[ CCTV Image Preview ]", text_color="#94a3b8")
+
+        # Plate High-Contrast Badge
+        ocr_box = ctk.CTkFrame(body, fg_color="#0284c7", corner_radius=6)
+        ocr_box.pack(fill="x", pady=(0, 16))
+        ctk.CTkLabel(ocr_box, text=plate, font=("Inter", 16, "bold"), text_color="#ffffff").pack(pady=8)
 
         # Analysis Grid
         grid = ctk.CTkFrame(body, fg_color="transparent")
@@ -208,52 +266,57 @@ class ANPRRecordsView(ctk.CTkFrame):
         grid.grid_columnconfigure(1, weight=1)
 
         a1 = ctk.CTkFrame(grid, fg_color=COLORS["surface"], border_color=COLORS["outline_variant"], border_width=1, corner_radius=8)
-        a1.grid(row=0, column=0, sticky="ew", padx=(0, 8))
+        a1.grid(row=0, column=0, sticky="ew", padx=(0, 6))
         a1_inner = ctk.CTkFrame(a1, fg_color="transparent")
-        a1_inner.pack(fill="both", expand=True, padx=12, pady=12)
-        ctk.CTkLabel(a1_inner, text="OCR CONFIDENCE", font=FONTS["label_md"], text_color=COLORS["on_surface_variant"]).pack(anchor="w")
-        
-        conf_row = ctk.CTkFrame(a1_inner, fg_color="transparent")
-        conf_row.pack(fill="x", pady=(4, 0))
-        ctk.CTkLabel(conf_row, text="96%", font=("Inter", 18, "bold"), text_color="#10b981").pack(side="left")
-        
-        bar_bg = ctk.CTkFrame(conf_row, fg_color=COLORS["surface_variant"], height=8, corner_radius=4)
-        bar_bg.pack(side="left", fill="x", expand=True, padx=(8, 0))
-        bar_fill = ctk.CTkFrame(bar_bg, fg_color="#10b981", corner_radius=4)
-        bar_fill.place(relx=0, rely=0, relwidth=0.96, relheight=1.0)
+        a1_inner.pack(fill="both", expand=True, padx=10, pady=10)
+        ctk.CTkLabel(a1_inner, text="OCR CONFIDENCE", font=("Inter", 9, "bold"), text_color=COLORS["on_surface_variant"]).pack(anchor="w")
+        ctk.CTkLabel(a1_inner, text=f"{conf}%", font=("Inter", 16, "bold"), text_color="#10b981").pack(anchor="w", pady=(2, 0))
 
         a2 = ctk.CTkFrame(grid, fg_color=COLORS["surface"], border_color=COLORS["outline_variant"], border_width=1, corner_radius=8)
-        a2.grid(row=0, column=1, sticky="ew")
+        a2.grid(row=0, column=1, sticky="ew", padx=(6, 0))
         a2_inner = ctk.CTkFrame(a2, fg_color="transparent")
-        a2_inner.pack(fill="both", expand=True, padx=12, pady=12)
-        ctk.CTkLabel(a2_inner, text="PROCESSING TIME", font=FONTS["label_md"], text_color=COLORS["on_surface_variant"]).pack(anchor="w")
-        ctk.CTkLabel(a2_inner, text="124ms", font=("Inter", 18, "bold"), text_color=COLORS["on_surface"]).pack(anchor="w", pady=(4, 0))
+        a2_inner.pack(fill="both", expand=True, padx=10, pady=10)
+        ctk.CTkLabel(a2_inner, text="CAMERA LOCATION", font=("Inter", 9, "bold"), text_color=COLORS["on_surface_variant"]).pack(anchor="w")
+        ctk.CTkLabel(a2_inner, text=f"Bay {bay}", font=("Inter", 16, "bold"), text_color="#0284c7").pack(anchor="w", pady=(2, 0))
 
-        div = ctk.CTkFrame(body, fg_color=COLORS["outline_variant"], height=1)
-        div.pack(fill="x", pady=16)
-
-        # Matched Record Info
-        ctk.CTkLabel(body, text="MATCHED BUS RECORD", font=FONTS["label_md"], text_color=COLORS["on_surface_variant"]).pack(anchor="w", pady=(0, 12))
+        # Matched Bus Record Info
+        ctk.CTkLabel(body, text="RESOLVED BUS TELEMETRY", font=("Inter", 10, "bold"), text_color=COLORS["on_surface_variant"]).pack(anchor="w", pady=(8, 8))
         
         info = [
-            ("Fleet ID", "BUS-402", COLORS["on_surface"]),
-            ("Route", "Express Link", COLORS["on_surface"]),
-            ("Operator", "Metro Transit Auth.", COLORS["on_surface"]),
-            ("Schedule Status", "On Time (+1m)", "#10b981")
+            ("Model / Type", b_type),
+            ("Destination", dest),
+            ("Assigned Driver", driver),
+            ("Sensor Feed", camera)
         ]
 
-        for k, v, col in info:
-            row = ctk.CTkFrame(body, fg_color="transparent")
-            row.pack(fill="x", pady=4)
-            ctk.CTkLabel(row, text=k, font=FONTS["body_md"], text_color=COLORS["on_surface_variant"]).pack(side="left")
-            ctk.CTkLabel(row, text=v, font=FONTS["body_md"], text_color=col).pack(side="right")
+        for k, v in info:
+            row = ctk.CTkFrame(body, fg_color=COLORS["surface"], border_color=COLORS["outline_variant"], border_width=1, corner_radius=6)
+            row.pack(fill="x", pady=3)
+            r_inner = ctk.CTkFrame(row, fg_color="transparent")
+            r_inner.pack(fill="x", padx=10, pady=6)
+            ctk.CTkLabel(r_inner, text=k, font=FONTS["label_md"], text_color=COLORS["on_surface_variant"]).pack(side="left")
+            ctk.CTkLabel(r_inner, text=v, font=("Inter", 11, "bold"), text_color=COLORS["on_surface"]).pack(side="right")
 
         # Action Footer
-        foot = ctk.CTkFrame(side_panel, fg_color=COLORS["surface_container_lowest"], border_color=COLORS["outline_variant"], border_width=1, corner_radius=12)
+        foot = ctk.CTkFrame(self.side_panel_frame, fg_color=COLORS["surface_container_lowest"], border_color=COLORS["outline_variant"], border_width=1, corner_radius=12)
         foot.pack(fill="x", side="bottom")
         
         f_inner = ctk.CTkFrame(foot, fg_color="transparent")
-        f_inner.pack(fill="x", padx=16, pady=16)
+        f_inner.pack(fill="x", padx=16, pady=14)
         
-        ctk.CTkButton(f_inner, text="Flag Review", font=FONTS["body_md"], text_color=COLORS["on_surface_variant"], fg_color="transparent", border_color=COLORS["outline_variant"], border_width=1, hover_color=COLORS["surface_container"], height=40, width=140).pack(side="left", padx=(0, 12))
-        ctk.CTkButton(f_inner, text="Confirm Match", font=FONTS["body_md"], text_color=COLORS["on_primary"], fg_color=COLORS["primary"], hover_color=COLORS["primary_container"], height=40, width=140).pack(side="left", expand=True)
+        def flag_review():
+            if self.selected_record:
+                ANPRRecordModel.update_record_status(self.selected_record["id"], "Flagged")
+                self.selected_record["match_status"] = "Flagged"
+                self._populate_grid()
+                self._build_sidebar(self.content_grid)
+
+        def confirm_match():
+            if self.selected_record:
+                ANPRRecordModel.update_record_status(self.selected_record["id"], "Verified")
+                self.selected_record["match_status"] = "Verified"
+                self._populate_grid()
+                self._build_sidebar(self.content_grid)
+
+        ctk.CTkButton(f_inner, text="Flag Review", font=FONTS["body_md"], text_color=COLORS["error"], fg_color="#fee2e2", hover_color="#fecaca", height=36, command=flag_review).pack(side="left", fill="x", expand=True, padx=(0, 6))
+        ctk.CTkButton(f_inner, text="Confirm Match", font=FONTS["body_md"], text_color="#ffffff", fg_color=COLORS["primary"], hover_color=COLORS["primary_container"], height=36, command=confirm_match).pack(side="right", fill="x", expand=True, padx=(6, 0))
