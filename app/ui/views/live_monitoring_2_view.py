@@ -26,7 +26,7 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
         self.is_detecting = False
         self.is_auto_streaming = False
         self._stream_timer = None
-        self._stream_idx = 0
+        self._sample_cycle_idx = 0
 
         self.video_label = None
         self.manifest_container = None
@@ -34,12 +34,13 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
         self.timeline_list_container = None
 
         self._build_header()
+        self._build_reviewer_demo_bar()
         self._build_content()
         self._refresh_all_data()
 
     def _build_header(self):
         header_frame = ctk.CTkFrame(self, fg_color="transparent")
-        header_frame.grid(row=0, column=0, sticky="ew", padx=32, pady=(32, 16))
+        header_frame.grid(row=0, column=0, sticky="ew", padx=32, pady=(32, 12))
         header_frame.grid_columnconfigure(0, weight=1)
 
         left = ctk.CTkFrame(header_frame, fg_color="transparent")
@@ -73,7 +74,7 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
 
         # Load Custom Real Bus Image File Dialog Button
         self.upload_btn = ctk.CTkButton(
-            right, text="📁 Load Bus Image...", font=FONTS["label_md"], height=36,
+            right, text="📁 Upload Bus Photo...", font=FONTS["label_md"], height=36,
             fg_color=COLORS["surface_container_high"], text_color=COLORS["on_surface"],
             border_color=COLORS["outline_variant"], border_width=1, hover_color=COLORS["surface_container_highest"],
             command=self._load_custom_image
@@ -93,21 +94,98 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
         self.detect_btn = ctk.CTkButton(
             right, text="⚡ Run AI Detection", font=FONTS["label_md"], height=36,
             fg_color=COLORS["primary"], text_color=COLORS["on_primary"], hover_color=COLORS["primary_container"],
-            command=self._trigger_ai_detection
+            command=lambda: self._trigger_ai_detection()
         )
         self.detect_btn.pack(side="left", padx=4)
 
-        # Live Stream / Auto-Simulate Toggle
-        self.stream_btn = ctk.CTkButton(
-            right, text="▶ Live Stream", font=FONTS["label_md"], height=36,
-            fg_color="#059669", text_color="#ffffff", hover_color="#047857",
+    def _build_reviewer_demo_bar(self):
+        """Dedicated prominent demonstration bar with 2 distinct real bus image scenarios."""
+        demo_card = ctk.CTkFrame(
+            self, 
+            fg_color="#eff6ff", 
+            border_color="#0284c7", 
+            border_width=2, 
+            corner_radius=12
+        )
+        demo_card.grid(row=1, column=0, sticky="ew", padx=32, pady=(0, 16))
+
+        inner = ctk.CTkFrame(demo_card, fg_color="transparent")
+        inner.pack(fill="x", padx=16, pady=12)
+
+        # Header of Demo Card
+        top_line = ctk.CTkFrame(inner, fg_color="transparent")
+        top_line.pack(fill="x", pady=(0, 8))
+
+        tag = ctk.CTkFrame(top_line, fg_color="#0284c7", corner_radius=6)
+        tag.pack(side="left")
+        ctk.CTkLabel(tag, text="★ REVIEWER LIVE DEMO", font=("Inter", 10, "bold"), text_color="#ffffff").pack(padx=8, pady=2)
+
+        ctk.CTkLabel(
+            top_line, 
+            text="Test 2 distinct real bus images with different number plates & routes to observe real-time system changes:", 
+            font=("Inter", 11, "bold"), 
+            text_color="#0f172a"
+        ).pack(side="left", padx=12)
+
+        # 3 Quick Action Action Cards / Buttons
+        btn_row = ctk.CTkFrame(inner, fg_color="transparent")
+        btn_row.pack(fill="x")
+        btn_row.grid_columnconfigure(0, weight=1)
+        btn_row.grid_columnconfigure(1, weight=1)
+        btn_row.grid_columnconfigure(2, weight=1)
+        btn_row.grid_columnconfigure(3, weight=1)
+
+        # Button 1: Sample Bus 1
+        self.b1_btn = ctk.CTkButton(
+            btn_row, 
+            text="🚌 Sample 1: TN 01 AN 2345\n(Volvo AC • Bay B02 • Bangalore)", 
+            font=("Inter", 11, "bold"), height=46,
+            fg_color="#1d4ed8", hover_color="#1e40af", text_color="#ffffff",
+            command=lambda: self._test_sample_image("sample_bus_1_TN01AN2345.jpg", "TN 01 AN 2345")
+        )
+        self.b1_btn.grid(row=0, column=0, sticky="ew", padx=(0, 6))
+
+        # Button 2: Sample Bus 2
+        self.b2_btn = ctk.CTkButton(
+            btn_row, 
+            text="🚍 Sample 2: TN 38 N 4567\n(Deluxe • Bay B03 • Coimbatore)", 
+            font=("Inter", 11, "bold"), height=46,
+            fg_color="#b45309", hover_color="#92400e", text_color="#ffffff",
+            command=lambda: self._test_sample_image("sample_bus_2_TN38N4567.jpg", "TN 38 N 4567")
+        )
+        self.b2_btn.grid(row=0, column=1, sticky="ew", padx=6)
+
+        # Button 3: Upload Any Custom Bus Image
+        self.upload_custom_btn = ctk.CTkButton(
+            btn_row, 
+            text="📁 Upload Any Real Bus Photo\n(Browse Local JPG/PNG File)", 
+            font=("Inter", 11, "bold"), height=46,
+            fg_color=COLORS["surface_container_lowest"], border_color="#0284c7", border_width=1,
+            hover_color=COLORS["surface_container_high"], text_color="#0284c7",
+            command=self._load_custom_image
+        )
+        self.upload_custom_btn.grid(row=0, column=2, sticky="ew", padx=6)
+
+        # Button 4: Continuous Real-Time Cycle Stream
+        self.cycle_btn = ctk.CTkButton(
+            btn_row, 
+            text="▶ Live Auto-Cycle Stream\n(Continuously alternate both buses)", 
+            font=("Inter", 11, "bold"), height=46,
+            fg_color="#059669", hover_color="#047857", text_color="#ffffff",
             command=self._toggle_auto_stream
         )
-        self.stream_btn.pack(side="left", padx=4)
+        self.cycle_btn.grid(row=0, column=3, sticky="ew", padx=(6, 0))
+
+    def _test_sample_image(self, img_filename, bus_reg):
+        """Immediately loads and processes the specified real bus sample image."""
+        self.selected_bus = bus_reg
+        self.bus_dropdown.set(bus_reg)
+        full_path = os.path.abspath(img_filename)
+        self._trigger_ai_detection(custom_path=full_path)
 
     def _build_content(self):
         content_frame = ctk.CTkFrame(self, fg_color="transparent")
-        content_frame.grid(row=1, column=0, sticky="nsew", padx=32, pady=16)
+        content_frame.grid(row=2, column=0, sticky="nsew", padx=32, pady=(0, 16))
         
         content_frame.grid_columnconfigure(0, weight=2)
         content_frame.grid_columnconfigure(1, weight=1)
@@ -266,10 +344,10 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
             self._trigger_ai_detection(custom_path=file_path)
 
     def _toggle_auto_stream(self):
-        """Starts or stops continuous real-time cycling of arriving/docking buses."""
+        """Starts or stops continuous real-time cycling between both sample buses."""
         if self.is_auto_streaming:
             self.is_auto_streaming = False
-            self.stream_btn.configure(text="▶ Live Stream", fg_color="#059669")
+            self.cycle_btn.configure(text="▶ Live Auto-Cycle Stream\n(Continuously alternate both buses)", fg_color="#059669")
             self.live_badge_text.configure(text="LIVE CCTV")
             self.live_indicator.configure(fg_color="#dc2626")
             if self._stream_timer:
@@ -277,7 +355,7 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
                 self._stream_timer = None
         else:
             self.is_auto_streaming = True
-            self.stream_btn.configure(text="⏹ Stop Stream", fg_color="#dc2626")
+            self.cycle_btn.configure(text="⏹ Stop Auto-Cycle\n(Stream Running Live)", fg_color="#dc2626")
             self.live_badge_text.configure(text="STREAMING ACTIVE")
             self.live_indicator.configure(fg_color="#16a34a")
             self._stream_step()
@@ -285,12 +363,16 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
     def _stream_step(self):
         if not self.is_auto_streaming or not self.winfo_exists():
             return
-        # Cycle through bus list
-        next_bus = self.current_bus_list[self._stream_idx % len(self.current_bus_list)]
-        self._stream_idx += 1
-        self.selected_bus = next_bus
-        self.bus_dropdown.set(next_bus)
-        self._trigger_ai_detection()
+        # Alternate between the two main sample buses for demo
+        samples = [
+            ("sample_bus_1_TN01AN2345.jpg", "TN 01 AN 2345"),
+            ("sample_bus_2_TN38N4567.jpg", "TN 38 N 4567")
+        ]
+        sample_img, bus_reg = samples[self._sample_cycle_idx % len(samples)]
+        self._sample_cycle_idx += 1
+        self.selected_bus = bus_reg
+        self.bus_dropdown.set(bus_reg)
+        self._trigger_ai_detection(custom_path=os.path.abspath(sample_img))
         # Schedule next cycle in 5 seconds
         self._stream_timer = self.after(5000, self._stream_step)
 
@@ -507,6 +589,21 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
     def _on_detection_complete(self):
         self.is_detecting = False
         self.detect_btn.configure(text="⚡ Run AI Detection", state="normal")
+        
+        # Sync selected_bus with latest detected vehicle in DB
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute("SELECT bus_registration FROM detections ORDER BY timestamp DESC LIMIT 1")
+            row = cur.fetchone()
+            if row:
+                self.selected_bus = row[0]
+                if self.selected_bus in self.current_bus_list:
+                    self.bus_dropdown.set(self.selected_bus)
+            conn.close()
+        except Exception:
+            pass
+
         self._refresh_all_data()
 
     def destroy(self):

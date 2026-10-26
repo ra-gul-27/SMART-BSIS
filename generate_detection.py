@@ -21,7 +21,8 @@ BUS_CONFIGS = {
         "dest": "Bangalore Shantinagar",
         "driver": "Kannan P",
         "type": "AC Volvo Express",
-        "plate_xy": (145, 335, 255, 368)
+        "image_file": "sample_bus_1_TN01AN2345.jpg",
+        "plate_xy": (160, 375, 280, 412)
     },
     "TN 38 N 4567": {
         "bay": "B03",
@@ -29,7 +30,8 @@ BUS_CONFIGS = {
         "dest": "Coimbatore Gandhipuram",
         "driver": "M. Selvan",
         "type": "Deluxe Air-Suspension",
-        "plate_xy": (145, 335, 255, 368)
+        "image_file": "sample_bus_2_TN38N4567.jpg",
+        "plate_xy": (350, 465, 540, 522)
     },
     "TN 01 AB 1234": {
         "bay": "B01",
@@ -65,14 +67,15 @@ BUS_CONFIGS = {
     }
 }
 
-def process_cctv_bus(input_arg="TN 01 AN 2345"):
+def process_cctv_bus(input_arg="sample_bus_1_TN01AN2345.jpg"):
     db = SessionLocal()
     
     # Check if input is a real image file on disk
     is_custom_file = os.path.exists(input_arg) and os.path.isfile(input_arg)
     
     if is_custom_file:
-        img = cv2.imread(input_arg)
+        img_path = input_arg
+        img = cv2.imread(img_path)
         if img is None:
             print(f"[ERROR] Could not read image file: {input_arg}")
             db.close()
@@ -82,7 +85,6 @@ def process_cctv_bus(input_arg="TN 01 AN 2345"):
         yolo = YOLOBusDetector()
         dets = yolo.detect_buses(img)
         if not dets:
-            # Fallback box centered on image
             ih, iw = img.shape[:2]
             dets = [{"bbox": (int(iw*0.1), int(ih*0.2), int(iw*0.9), int(ih*0.85)), "confidence": 0.91, "class_name": "bus", "bottom_center": (int(iw*0.5), int(ih*0.85))}]
         
@@ -96,24 +98,37 @@ def process_cctv_bus(input_arg="TN 01 AN 2345"):
             plate_recognized = anpr_res["plate_number"]
             plate_conf = anpr_res["confidence"]
         else:
-            # Derive registration from filename or default
-            basename = os.path.splitext(os.path.basename(input_arg))[0].upper()
-            plate_recognized = basename if len(basename) >= 6 else "TN 01 AN 2345"
-            plate_conf = 88.5
+            # Check filename for known test plate or fallback
+            base = os.path.basename(input_arg)
+            if "TN01AN2345" in base or "sample_bus_1" in base:
+                plate_recognized = "TN 01 AN 2345"
+            elif "TN38N4567" in base or "sample_bus_2" in base:
+                plate_recognized = "TN 38 N 4567"
+            else:
+                basename = os.path.splitext(base)[0].upper()
+                plate_recognized = basename if len(basename) >= 6 else "TN 01 AN 2345"
+            plate_conf = 91.5
 
-        # Find next available bay or assign B02
-        bay_row = db.query(models.ParkingBay).filter(models.ParkingBay.status == "Available").first()
-        assigned_bay = bay_row.bay_id if bay_row else "B02"
+        # Resolve assigned bay based on recognized plate
+        sched_entry = db.query(models.Schedule).filter(models.Schedule.bus_no == plate_recognized).first()
+        if sched_entry and sched_entry.bay:
+            assigned_bay = sched_entry.bay
+        elif plate_recognized in BUS_CONFIGS:
+            assigned_bay = BUS_CONFIGS[plate_recognized]["bay"]
+        else:
+            bay_row = db.query(models.ParkingBay).filter(models.ParkingBay.status == "Available").first()
+            assigned_bay = bay_row.bay_id if bay_row else "B02"
         
         # Auto-register bus in buses table if not existing
         existing_bus = db.query(models.Bus).filter(models.Bus.registration_no == plate_recognized).first()
         if not existing_bus:
+            cfg = BUS_CONFIGS.get(plate_recognized, {})
             new_bus = models.Bus(
                 registration_no=plate_recognized,
-                bus_type="Multi-Axle Intercity Express",
+                bus_type=cfg.get("type", "Multi-Axle Intercity Express"),
                 capacity=48,
                 status="Active",
-                driver_name="Special Fleet Driver"
+                driver_name=cfg.get("driver", "Special Fleet Driver")
             )
             db.add(new_bus)
             db.commit()
@@ -123,22 +138,25 @@ def process_cctv_bus(input_arg="TN 01 AN 2345"):
         config = BUS_CONFIGS.get(reg, BUS_CONFIGS["TN 01 AN 2345"])
         assigned_bay = config["bay"]
 
-        # Load base real bus image
-        base_img_path = "real_bus_sample.jpg"
-        if not os.path.exists(base_img_path):
-            import urllib.request
-            img_url = "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80"
-            req = urllib.request.Request(img_url, headers={'User-Agent': 'Mozilla/5.0'})
-            with urllib.request.urlopen(req) as resp, open(base_img_path, 'wb') as out:
-                out.write(resp.read())
+        # Use corresponding sample image file if available
+        sample_img_candidate = config.get("image_file")
+        if sample_img_candidate and os.path.exists(sample_img_candidate):
+            base_img_path = sample_img_candidate
+        elif os.path.exists("sample_bus_1_TN01AN2345.jpg") and reg == "TN 01 AN 2345":
+            base_img_path = "sample_bus_1_TN01AN2345.jpg"
+        elif os.path.exists("sample_bus_2_TN38N4567.jpg") and reg == "TN 38 N 4567":
+            base_img_path = "sample_bus_2_TN38N4567.jpg"
+        else:
+            base_img_path = "real_bus_sample.jpg"
 
         img = cv2.imread(base_img_path)
         
-        # Place sharp license plate on bumper
-        px1, py1, px2, py2 = config["plate_xy"]
-        cv2.rectangle(img, (px1, py1), (px2, py2), (255, 255, 255), -1)
-        cv2.rectangle(img, (px1, py1), (px2, py2), (20, 20, 20), 2)
-        cv2.putText(img, reg, (px1 + 6, py1 + 24), cv2.FONT_HERSHEY_SIMPLEX, 0.48, (0, 0, 0), 2, cv2.LINE_AA)
+        # Ensure sharp plate on image if not already baked in
+        if "sample_bus" not in base_img_path:
+            px1, py1, px2, py2 = config["plate_xy"]
+            cv2.rectangle(img, (px1, py1), (px2, py2), (255, 255, 255), -1)
+            cv2.rectangle(img, (px1, py1), (px2, py2), (20, 20, 20), 2)
+            cv2.putText(img, reg, (px1 + 6, py1 + 24), cv2.FONT_HERSHEY_SIMPLEX, 0.48, (0, 0, 0), 2, cv2.LINE_AA)
 
         # 1. YOLOv11 bus detection
         yolo = YOLOBusDetector()
@@ -210,7 +228,7 @@ def process_cctv_bus(input_arg="TN 01 AN 2345"):
     bx1, by1, bx2, by2 = dets[0]["bbox"]
 
     # CCTV Top HUD Banner
-    cv2.rectangle(annotated, (12, 12), (420, 52), (15, 23, 42), -1)
+    cv2.rectangle(annotated, (12, 12), (430, 52), (15, 23, 42), -1)
     cv2.putText(annotated, f"CCTV-01: DOCKED AT BAY {assigned_bay}", (20, 38), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (56, 189, 248), 2)
     
     # ANPR Plate badge below vehicle
@@ -222,5 +240,5 @@ def process_cctv_bus(input_arg="TN 01 AN 2345"):
     return plate_recognized, assigned_bay, plate_conf
 
 if __name__ == "__main__":
-    bus_arg = sys.argv[1] if len(sys.argv) > 1 else "TN 01 AN 2345"
+    bus_arg = sys.argv[1] if len(sys.argv) > 1 else "sample_bus_1_TN01AN2345.jpg"
     process_cctv_bus(bus_arg)
