@@ -30,6 +30,9 @@ class BusManagementView(ctk.CTkFrame):
         ctk.CTkLabel(left, text="Bus Management", font=FONTS["headline_lg"], text_color=COLORS["on_surface"]).pack(anchor="w")
         ctk.CTkLabel(left, text="Manage fleet, monitor status, and assign routes.", font=FONTS["body_md"], text_color=COLORS["on_surface_variant"]).pack(anchor="w")
 
+        right = ctk.CTkFrame(header, fg_color="transparent")
+        right.grid(row=0, column=1, sticky="e")
+
         self.search_var = ctk.StringVar(value="")
         self.status_filter_var = ctk.StringVar(value="All Status")
 
