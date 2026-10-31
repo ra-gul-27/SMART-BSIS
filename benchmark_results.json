@@ -1,0 +1,30 @@
+{
+  "hardware": {
+    "os": "Windows 11",
+    "python_version": "3.11.9",
+    "frameworks": [
+      "PyTorch 2.x",
+      "Ultralytics YOLOv11",
+      "EasyOCR CRAFT+CRNN",
+      "PostgreSQL",
+      "FastAPI"
+    ]
+  },
+  "latencies_ms": {
+    "yolo_detection": 155.94,
+    "anpr_recognition": 1696.6,
+    "bay_spatial_mapping": 0.134,
+    "postgresql_roundtrip": 4.57,
+    "total_end_to_end": 1857.27,
+    "pipeline_fps": 0.5
+  },
+  "accuracies_pct": {
+    "yolo_precision": 100.0,
+    "yolo_recall": 100.0,
+    "yolo_f1_score": 100.0,
+    "yolo_mean_confidence": 89.0,
+    "anpr_accuracy": 100.0,
+    "anpr_mean_confidence": 92.5,
+    "bay_mapping_accuracy": 100.0
+  }
+}
