@@ -142,54 +142,66 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
             text_color="#0f172a"
         ).pack(side="left", padx=12)
 
-        # Row 1: Real-Time Video Stream Controls
+        # Row 1: Real-Time Video Stream Controls (5 Grid Columns)
         v_row = ctk.CTkFrame(inner, fg_color="transparent")
         v_row.pack(fill="x", pady=(0, 6))
         v_row.grid_columnconfigure(0, weight=2)
         v_row.grid_columnconfigure(1, weight=2)
-        v_row.grid_columnconfigure(2, weight=1)
+        v_row.grid_columnconfigure(2, weight=2)
         v_row.grid_columnconfigure(3, weight=1)
+        v_row.grid_columnconfigure(4, weight=1)
 
-        # Button 1: Play Terminal CCTV Video
+        # Button 1: Real Bus Station Video (KSRTC Real Footage)
+        self.real_footage_btn = ctk.CTkButton(
+            v_row, 
+            text="🎥 Real Bus Station CCTV\n(Actual KSRTC Terminal Footage)", 
+            font=("Inter", 11, "bold"), height=46,
+            fg_color="#0284c7", hover_color="#0369a1", text_color="#ffffff",
+            command=self._start_real_footage_stream
+        )
+        self.real_footage_btn.grid(row=0, column=0, sticky="ew", padx=(0, 4))
+
+        # Button 2: Play Terminal CCTV Docking Stream (B02 & B03 with Plates)
         self.play_video_btn = ctk.CTkButton(
             v_row, 
-            text="🎬 Play Real-Time Bus Terminal Video\n(Moving buses, docking in Bay B02 & B03)", 
+            text="🚌 Bus Bay Docking Stream\n(Volvo & Deluxe • Bay B02 & B03)", 
             font=("Inter", 11, "bold"), height=46,
             fg_color="#059669", hover_color="#047857", text_color="#ffffff",
             command=self._start_sample_video_stream
         )
-        self.play_video_btn.grid(row=0, column=0, sticky="ew", padx=(0, 6))
+        self.play_video_btn.grid(row=0, column=1, sticky="ew", padx=4)
 
-        # Button 2: Upload Custom Video File
+        # Button 3: Upload Custom Video File
         self.upload_video_btn = ctk.CTkButton(
             v_row, 
-            text="📁 Upload Any Video File...\n(Select .mp4, .avi, .mkv from disk)", 
-            font=("Inter", 11, "bold"), height=46,
-            fg_color="#0284c7", hover_color="#0369a1", text_color="#ffffff",
-            command=self._load_custom_video
-        )
-        self.upload_video_btn.grid(row=0, column=1, sticky="ew", padx=6)
-
-        # Button 3: Live Webcam Feed
-        self.webcam_btn = ctk.CTkButton(
-            v_row, 
-            text="🎥 Live Webcam\n(Camera 0)", 
+            text="📁 Upload Video File...\n(Browse .mp4/.avi on disk)", 
             font=("Inter", 11, "bold"), height=46,
             fg_color=COLORS["surface_container_lowest"], border_color="#0284c7", border_width=1,
             hover_color=COLORS["surface_container_high"], text_color="#0284c7",
+            command=self._load_custom_video
+        )
+        self.upload_video_btn.grid(row=0, column=2, sticky="ew", padx=4)
+
+        # Button 4: Live Webcam Feed
+        self.webcam_btn = ctk.CTkButton(
+            v_row, 
+            text="📹 Webcam\n(Camera 0)", 
+            font=("Inter", 11, "bold"), height=46,
+            fg_color=COLORS["surface_container_lowest"], border_color=COLORS["outline_variant"], border_width=1,
+            hover_color=COLORS["surface_container_high"], text_color=COLORS["on_surface"],
             command=self._start_webcam_stream
         )
-        self.webcam_btn.grid(row=0, column=2, sticky="ew", padx=6)
+        self.webcam_btn.grid(row=0, column=3, sticky="ew", padx=4)
 
-        # Button 4: Stop Video Stream
+        # Button 5: Stop Video Stream
         self.stop_video_btn = ctk.CTkButton(
             v_row, 
-            text="⏹ Stop Stream", 
+            text="⏹ Stop", 
             font=("Inter", 11, "bold"), height=46,
             fg_color="#dc2626", hover_color="#b91c1c", text_color="#ffffff",
             command=self._stop_video_stream
         )
-        self.stop_video_btn.grid(row=0, column=3, sticky="ew", padx=(6, 0))
+        self.stop_video_btn.grid(row=0, column=4, sticky="ew", padx=(4, 0))
 
         # Row 2: Secondary Photo Test Bar
         p_row = ctk.CTkFrame(inner, fg_color="#f8fafc", corner_radius=8)
@@ -217,6 +229,16 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
             command=self._toggle_auto_stream
         )
         self.cycle_btn.pack(side="left", padx=4)
+
+    def _start_real_footage_stream(self):
+        """Streams actual KSRTC bus station video footage (Davanagere Terminal)."""
+        video_file = "real_bus_station_cctv.mp4"
+        if not os.path.exists(video_file):
+            video_file = "real_bus_station_cctv.webm"
+        if os.path.exists(video_file):
+            self._start_video_stream_source(video_file)
+        else:
+            print("[NOTICE] Real bus station video file not found on disk.")
 
     def _start_sample_video_stream(self):
         """Streams the realistic synthetic terminal CCTV video with real bus docking."""
