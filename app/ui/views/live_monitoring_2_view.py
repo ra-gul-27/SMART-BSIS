@@ -133,43 +133,43 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
 
         tag = ctk.CTkFrame(top_line, fg_color="#0284c7", corner_radius=6)
         tag.pack(side="left")
-        ctk.CTkLabel(tag, text="★ REVIEWER LIVE DEMO & VIDEO ENGINE", font=("Inter", 10, "bold"), text_color="#ffffff").pack(padx=8, pady=2)
+        ctk.CTkLabel(tag, text="★ TWO-CAMERA INTELLIGENT SYSTEM (BAYS B01, B02, B03)", font=("Inter", 10, "bold"), text_color="#ffffff").pack(padx=8, pady=2)
 
         ctk.CTkLabel(
             top_line, 
-            text="Detect and track real-time buses with YOLOv11 & ANPR across continuous video feeds or static photos:", 
+            text="CAM-01 (Top-View) verifies 5-second dwell hold (Red -> Green); CAM-02 (Front-View) then triggers ANPR plate detection:", 
             font=("Inter", 11, "bold"), 
             text_color="#0f172a"
         ).pack(side="left", padx=12)
 
-        # Row 1: Real-Time Video Stream Controls (5 Grid Columns)
+        # Row 1: Real-Time Video Stream Controls
         v_row = ctk.CTkFrame(inner, fg_color="transparent")
         v_row.pack(fill="x", pady=(0, 6))
-        v_row.grid_columnconfigure(0, weight=2)
+        v_row.grid_columnconfigure(0, weight=3)
         v_row.grid_columnconfigure(1, weight=2)
         v_row.grid_columnconfigure(2, weight=2)
         v_row.grid_columnconfigure(3, weight=1)
         v_row.grid_columnconfigure(4, weight=1)
 
-        # Button 1: Real Bus Station Video (KSRTC Real Footage)
+        # Button 1: Two-Camera Intelligent Stream (Top-View Bays B01, B02, B03 with 5s hold + Front ANPR)
+        self.dual_cam_btn = ctk.CTkButton(
+            v_row, 
+            text="🎬 Two-Camera 5s Hold Stream\n(CAM-01 Top B01-B03 Red->Green + CAM-02 Front ANPR)", 
+            font=("Inter", 11, "bold"), height=46,
+            fg_color="#059669", hover_color="#047857", text_color="#ffffff",
+            command=self._start_dual_camera_stream
+        )
+        self.dual_cam_btn.grid(row=0, column=0, sticky="ew", padx=(0, 4))
+
+        # Button 2: Real Bus Station Video (KSRTC Davanagere Footage)
         self.real_footage_btn = ctk.CTkButton(
             v_row, 
-            text="🎥 Real Bus Station CCTV\n(Actual KSRTC Terminal Footage)", 
+            text="🎥 Real KSRTC Bus CCTV\n(Actual Terminal Footage)", 
             font=("Inter", 11, "bold"), height=46,
             fg_color="#0284c7", hover_color="#0369a1", text_color="#ffffff",
             command=self._start_real_footage_stream
         )
-        self.real_footage_btn.grid(row=0, column=0, sticky="ew", padx=(0, 4))
-
-        # Button 2: Play Terminal CCTV Docking Stream (B02 & B03 with Plates)
-        self.play_video_btn = ctk.CTkButton(
-            v_row, 
-            text="🚌 Bus Bay Docking Stream\n(Volvo & Deluxe • Bay B02 & B03)", 
-            font=("Inter", 11, "bold"), height=46,
-            fg_color="#059669", hover_color="#047857", text_color="#ffffff",
-            command=self._start_sample_video_stream
-        )
-        self.play_video_btn.grid(row=0, column=1, sticky="ew", padx=4)
+        self.real_footage_btn.grid(row=0, column=1, sticky="ew", padx=4)
 
         # Button 3: Upload Custom Video File
         self.upload_video_btn = ctk.CTkButton(
@@ -230,6 +230,17 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
         )
         self.cycle_btn.pack(side="left", padx=4)
 
+    def _start_dual_camera_stream(self):
+        """Streams the synchronized two-camera system (Top-View Bays B01, B02, B03 with 5s hold + Front ANPR)."""
+        video_file = "dual_camera_smart_bus_system.mp4"
+        if not os.path.exists(video_file):
+            try:
+                import create_dual_cam_bus_video
+                create_dual_cam_bus_video.generate_dual_camera_video(video_file)
+            except Exception as e:
+                print(f"Error generating dual camera video: {e}")
+        self._start_video_stream_source(video_file)
+
     def _start_real_footage_stream(self):
         """Streams actual KSRTC bus station video footage (Davanagere Terminal)."""
         video_file = "real_bus_station_cctv.mp4"
@@ -244,13 +255,11 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
         """Streams the realistic synthetic terminal CCTV video with real bus docking."""
         video_file = "sample_bus_terminal_stream.mp4"
         if not os.path.exists(video_file):
-            # Auto-generate if missing
             try:
                 import create_sample_bus_video
                 create_sample_bus_video.generate_terminal_video(video_file)
             except Exception as e:
                 print(f"Error generating sample video: {e}")
-        
         self._start_video_stream_source(video_file)
 
     def _load_custom_video(self):
@@ -335,26 +344,37 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
                 pass
 
         # Schedule next tick at ~35ms
-        self._video_timer = self.after(35, self._video_tick)
+        if self.is_video_streaming and self.winfo_exists():
+            self._video_timer = self.after(35, self._video_tick)
 
     def _on_video_detection_event(self, data: dict):
-        """Thread-safe event callback triggered when a bus is identified in the video."""
-        self.after(0, lambda: self._apply_video_detection_ui(data))
+        """Thread-safe event callback triggered when a bus is confirmed parked (5s hold)."""
+        try:
+            if self.winfo_exists():
+                self.after(0, lambda: self._apply_video_detection_ui(data))
+        except Exception:
+            pass
 
     def _apply_video_detection_ui(self, data: dict):
         """Dynamically synchronizes manifest, detections list, and timeline to the video-detected bus."""
-        plate = data.get("plate_number")
-        if plate:
-            self.selected_bus = plate
-            if plate not in self.current_bus_list:
-                self.current_bus_list.append(plate)
-                self.bus_dropdown.configure(values=self.current_bus_list)
-            self.bus_dropdown.set(plate)
-            
-            # Immediately refresh manifest and timeline with zero lag
-            self._load_manifest()
-            self._load_detections()
-            self._load_timeline()
+        try:
+            if not self.winfo_exists():
+                return
+            plate = data.get("plate_number")
+            bay = data.get("bay_id")
+            if plate:
+                self.selected_bus = plate
+                if plate not in self.current_bus_list:
+                    self.current_bus_list.append(plate)
+                    self.bus_dropdown.configure(values=self.current_bus_list)
+                self.bus_dropdown.set(plate)
+                
+                # Immediately refresh manifest and timeline with zero lag
+                self._load_manifest()
+                self._load_detections()
+                self._load_timeline()
+        except Exception as e:
+            print(f"[UI SYNC NOTICE]: {e}")
 
     def _test_sample_image(self, img_filename, bus_reg):
         """Immediately loads and processes the specified real bus sample photo."""
