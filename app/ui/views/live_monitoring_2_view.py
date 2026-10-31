@@ -150,6 +150,7 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
         v_row.grid_columnconfigure(2, weight=2)
         v_row.grid_columnconfigure(3, weight=1)
         v_row.grid_columnconfigure(4, weight=1)
+        v_row.grid_columnconfigure(5, weight=1)
 
         # Button 1: Two-Camera Intelligent Stream (Top-View Bays B01, B02, B03 with 5s hold + Front ANPR)
         self.dual_cam_btn = ctk.CTkButton(
@@ -193,7 +194,17 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
         )
         self.webcam_btn.grid(row=0, column=3, sticky="ew", padx=4)
 
-        # Button 5: Stop Video Stream
+        # Button 5: Pause / Resume Stream
+        self.pause_resume_btn = ctk.CTkButton(
+            v_row, 
+            text="⏸ Pause", 
+            font=("Inter", 11, "bold"), height=46,
+            fg_color="#b45309", hover_color="#92400e", text_color="#ffffff",
+            command=self._pause_video_stream
+        )
+        self.pause_resume_btn.grid(row=0, column=4, sticky="ew", padx=4)
+
+        # Button 6: Stop Video Stream
         self.stop_video_btn = ctk.CTkButton(
             v_row, 
             text="⏹ Stop", 
@@ -201,7 +212,7 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
             fg_color="#dc2626", hover_color="#b91c1c", text_color="#ffffff",
             command=self._stop_video_stream
         )
-        self.stop_video_btn.grid(row=0, column=4, sticky="ew", padx=(4, 0))
+        self.stop_video_btn.grid(row=0, column=5, sticky="ew", padx=(4, 0))
 
         # Row 2: Secondary Photo Test Bar
         p_row = ctk.CTkFrame(inner, fg_color="#f8fafc", corner_radius=8)
@@ -287,20 +298,25 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
             source_lbl = os.path.basename(str(source)) if isinstance(source, str) else f"Webcam {source}"
             self.live_badge_text.configure(text=f"● STREAMING: {source_lbl}")
             self.live_indicator.configure(fg_color="#16a34a")
-            self.play_video_btn.configure(text="⏸ Pause Stream", command=self._pause_video_stream, fg_color="#b45309")
+            if hasattr(self, "pause_resume_btn"):
+                self.pause_resume_btn.configure(text="⏸ Pause", fg_color="#b45309", state="normal")
             
             # Start UI video render tick
             self._video_tick()
 
     def _pause_video_stream(self):
+        if not self.is_video_streaming:
+            return
         if self.video_engine.is_paused:
             self.video_engine.resume_stream()
-            self.play_video_btn.configure(text="⏸ Pause Stream")
+            if hasattr(self, "pause_resume_btn"):
+                self.pause_resume_btn.configure(text="⏸ Pause", fg_color="#b45309")
             self.live_badge_text.configure(text="● STREAMING ACTIVE")
             self.live_indicator.configure(fg_color="#16a34a")
         else:
             self.video_engine.pause_stream()
-            self.play_video_btn.configure(text="▶ Resume Stream")
+            if hasattr(self, "pause_resume_btn"):
+                self.pause_resume_btn.configure(text="▶ Resume", fg_color="#16a34a")
             self.live_badge_text.configure(text="⏸ PAUSED")
             self.live_indicator.configure(fg_color="#f59e0b")
 
@@ -314,11 +330,8 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
             self._video_timer = None
 
         self.video_engine.stop_stream()
-        self.play_video_btn.configure(
-            text="🎬 Play Real-Time Bus Terminal Video\n(Moving buses, docking in Bay B02 & B03)", 
-            command=self._start_sample_video_stream, 
-            fg_color="#059669"
-        )
+        if hasattr(self, "pause_resume_btn"):
+            self.pause_resume_btn.configure(text="⏸ Pause", fg_color="#b45309")
         self.live_badge_text.configure(text="⏹ STREAM STOPPED")
         self.live_indicator.configure(fg_color="#dc2626")
         self._refresh_all_data()
@@ -334,6 +347,7 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
                 rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 pil_img = Image.fromarray(rgb_frame)
                 ctk_img = ctk.CTkImage(light_image=pil_img, dark_image=pil_img, size=(680, 380))
+                self._current_video_img = ctk_img
                 self.video_label.configure(image=ctk_img, text="")
                 
                 # Update bottom sensor telemetry
