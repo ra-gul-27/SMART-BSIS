@@ -41,16 +41,16 @@ class VideoAnalyticsEngine:
         # Three Terminal Bays B01, B02, B03 calibrated for top-view perspective
         # Default dual-camera geometry (left pane width 740)
         self.dual_cam_bays = {
-            "B01": [[30, 110], [250, 110], [250, 680], [30, 680]],
-            "B02": [[265, 110], [485, 110], [485, 680], [265, 680]],
-            "B03": [[500, 110], [720, 110], [720, 680], [500, 680]]
+            "B01": [[15, 80], [235, 80], [235, 680], [15, 680]],
+            "B02": [[245, 80], [475, 80], [475, 680], [245, 680]],
+            "B03": [[485, 80], [725, 80], [725, 680], [485, 680]]
         }
 
-        # Single camera fallback geometry (1280 wide)
+        # Single camera fallback geometry (calibrated for real terminal footage 854x480)
         self.single_cam_bays = {
-            "B01": [[30, 110], [410, 110], [410, 680], [30, 680]],
-            "B02": [[430, 110], [830, 110], [830, 680], [430, 680]],
-            "B03": [[850, 110], [1250, 110], [1250, 680], [850, 680]]
+            "B01": [[10, 50], [270, 50], [270, 460], [10, 460]],
+            "B02": [[280, 50], [550, 50], [550, 460], [280, 460]],
+            "B03": [[560, 50], [840, 50], [840, 460], [560, 460]]
         }
 
         self.bay_mgr.bays = self.dual_cam_bays
