@@ -3,9 +3,17 @@ import sys
 import threading
 import tkinter.filedialog as filedialog
 import customtkinter as ctk
+import cv2
 from PIL import Image
 from app.constants import COLORS, FONTS
 from app.db.database import get_connection
+
+# Add project root and backend to path
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+if ROOT_DIR not in sys.path:
+    sys.path.append(ROOT_DIR)
+
+from backend.vision.video_pipeline import VideoAnalyticsEngine
 
 class LiveMonitoring2View(ctk.CTkScrollableFrame):
     def __init__(self, master, app_controller, **kwargs):
@@ -27,6 +35,13 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
         self.is_auto_streaming = False
         self._stream_timer = None
         self._sample_cycle_idx = 0
+
+        # Video Engine State
+        self.video_engine = VideoAnalyticsEngine()
+        self.video_engine.register_callback(self._on_video_detection_event)
+        self.is_video_streaming = False
+        self._video_timer = None
+        self.active_video_source = "sample_bus_terminal_stream.mp4"
 
         self.video_label = None
         self.manifest_container = None
@@ -55,7 +70,7 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
         back_btn.pack(anchor="w", pady=(0, 4))
         
         ctk.CTkLabel(
-            left, text="Real-Time AI Vision: YOLOv11 + ANPR Bay Monitor", font=FONTS["headline_lg"], text_color=COLORS["on_surface"]
+            left, text="Real-Time AI Vision: YOLOv11 + ANPR Video Terminal Stream", font=FONTS["headline_lg"], text_color=COLORS["on_surface"]
         ).pack(anchor="w")
 
         right = ctk.CTkFrame(header_frame, fg_color="transparent")
@@ -72,9 +87,9 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
         self.bus_dropdown.pack(side="left", padx=(0, 6))
         self.bus_dropdown.set(self.selected_bus)
 
-        # Load Custom Real Bus Image File Dialog Button
+        # Upload Photo Button
         self.upload_btn = ctk.CTkButton(
-            right, text="📁 Upload Bus Photo...", font=FONTS["label_md"], height=36,
+            right, text="📷 Upload Photo...", font=FONTS["label_md"], height=36,
             fg_color=COLORS["surface_container_high"], text_color=COLORS["on_surface"],
             border_color=COLORS["outline_variant"], border_width=1, hover_color=COLORS["surface_container_highest"],
             command=self._load_custom_image
@@ -92,14 +107,14 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
 
         # Single Run AI Detection
         self.detect_btn = ctk.CTkButton(
-            right, text="⚡ Run AI Detection", font=FONTS["label_md"], height=36,
+            right, text="⚡ Run Photo AI", font=FONTS["label_md"], height=36,
             fg_color=COLORS["primary"], text_color=COLORS["on_primary"], hover_color=COLORS["primary_container"],
             command=lambda: self._trigger_ai_detection()
         )
         self.detect_btn.pack(side="left", padx=4)
 
     def _build_reviewer_demo_bar(self):
-        """Dedicated prominent demonstration bar with 2 distinct real bus image scenarios."""
+        """Prominent dual-mode demonstration bar supporting both Live Video Stream and Real Bus Photo Analysis."""
         demo_card = ctk.CTkFrame(
             self, 
             fg_color="#eff6ff", 
@@ -118,66 +133,212 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
 
         tag = ctk.CTkFrame(top_line, fg_color="#0284c7", corner_radius=6)
         tag.pack(side="left")
-        ctk.CTkLabel(tag, text="★ REVIEWER LIVE DEMO", font=("Inter", 10, "bold"), text_color="#ffffff").pack(padx=8, pady=2)
+        ctk.CTkLabel(tag, text="★ REVIEWER LIVE DEMO & VIDEO ENGINE", font=("Inter", 10, "bold"), text_color="#ffffff").pack(padx=8, pady=2)
 
         ctk.CTkLabel(
             top_line, 
-            text="Test 2 distinct real bus images with different number plates & routes to observe real-time system changes:", 
+            text="Detect and track real-time buses with YOLOv11 & ANPR across continuous video feeds or static photos:", 
             font=("Inter", 11, "bold"), 
             text_color="#0f172a"
         ).pack(side="left", padx=12)
 
-        # 3 Quick Action Action Cards / Buttons
-        btn_row = ctk.CTkFrame(inner, fg_color="transparent")
-        btn_row.pack(fill="x")
-        btn_row.grid_columnconfigure(0, weight=1)
-        btn_row.grid_columnconfigure(1, weight=1)
-        btn_row.grid_columnconfigure(2, weight=1)
-        btn_row.grid_columnconfigure(3, weight=1)
+        # Row 1: Real-Time Video Stream Controls
+        v_row = ctk.CTkFrame(inner, fg_color="transparent")
+        v_row.pack(fill="x", pady=(0, 6))
+        v_row.grid_columnconfigure(0, weight=2)
+        v_row.grid_columnconfigure(1, weight=2)
+        v_row.grid_columnconfigure(2, weight=1)
+        v_row.grid_columnconfigure(3, weight=1)
 
-        # Button 1: Sample Bus 1
-        self.b1_btn = ctk.CTkButton(
-            btn_row, 
-            text="🚌 Sample 1: TN 01 AN 2345\n(Volvo AC • Bay B02 • Bangalore)", 
+        # Button 1: Play Terminal CCTV Video
+        self.play_video_btn = ctk.CTkButton(
+            v_row, 
+            text="🎬 Play Real-Time Bus Terminal Video\n(Moving buses, docking in Bay B02 & B03)", 
             font=("Inter", 11, "bold"), height=46,
-            fg_color="#1d4ed8", hover_color="#1e40af", text_color="#ffffff",
-            command=lambda: self._test_sample_image("sample_bus_1_TN01AN2345.jpg", "TN 01 AN 2345")
+            fg_color="#059669", hover_color="#047857", text_color="#ffffff",
+            command=self._start_sample_video_stream
         )
-        self.b1_btn.grid(row=0, column=0, sticky="ew", padx=(0, 6))
+        self.play_video_btn.grid(row=0, column=0, sticky="ew", padx=(0, 6))
 
-        # Button 2: Sample Bus 2
-        self.b2_btn = ctk.CTkButton(
-            btn_row, 
-            text="🚍 Sample 2: TN 38 N 4567\n(Deluxe • Bay B03 • Coimbatore)", 
+        # Button 2: Upload Custom Video File
+        self.upload_video_btn = ctk.CTkButton(
+            v_row, 
+            text="📁 Upload Any Video File...\n(Select .mp4, .avi, .mkv from disk)", 
             font=("Inter", 11, "bold"), height=46,
-            fg_color="#b45309", hover_color="#92400e", text_color="#ffffff",
-            command=lambda: self._test_sample_image("sample_bus_2_TN38N4567.jpg", "TN 38 N 4567")
+            fg_color="#0284c7", hover_color="#0369a1", text_color="#ffffff",
+            command=self._load_custom_video
         )
-        self.b2_btn.grid(row=0, column=1, sticky="ew", padx=6)
+        self.upload_video_btn.grid(row=0, column=1, sticky="ew", padx=6)
 
-        # Button 3: Upload Any Custom Bus Image
-        self.upload_custom_btn = ctk.CTkButton(
-            btn_row, 
-            text="📁 Upload Any Real Bus Photo\n(Browse Local JPG/PNG File)", 
+        # Button 3: Live Webcam Feed
+        self.webcam_btn = ctk.CTkButton(
+            v_row, 
+            text="🎥 Live Webcam\n(Camera 0)", 
             font=("Inter", 11, "bold"), height=46,
             fg_color=COLORS["surface_container_lowest"], border_color="#0284c7", border_width=1,
             hover_color=COLORS["surface_container_high"], text_color="#0284c7",
-            command=self._load_custom_image
+            command=self._start_webcam_stream
         )
-        self.upload_custom_btn.grid(row=0, column=2, sticky="ew", padx=6)
+        self.webcam_btn.grid(row=0, column=2, sticky="ew", padx=6)
 
-        # Button 4: Continuous Real-Time Cycle Stream
-        self.cycle_btn = ctk.CTkButton(
-            btn_row, 
-            text="▶ Live Auto-Cycle Stream\n(Continuously alternate both buses)", 
+        # Button 4: Stop Video Stream
+        self.stop_video_btn = ctk.CTkButton(
+            v_row, 
+            text="⏹ Stop Stream", 
             font=("Inter", 11, "bold"), height=46,
-            fg_color="#059669", hover_color="#047857", text_color="#ffffff",
+            fg_color="#dc2626", hover_color="#b91c1c", text_color="#ffffff",
+            command=self._stop_video_stream
+        )
+        self.stop_video_btn.grid(row=0, column=3, sticky="ew", padx=(6, 0))
+
+        # Row 2: Secondary Photo Test Bar
+        p_row = ctk.CTkFrame(inner, fg_color="#f8fafc", corner_radius=8)
+        p_row.pack(fill="x", pady=(4, 0))
+        p_row_inner = ctk.CTkFrame(p_row, fg_color="transparent")
+        p_row_inner.pack(fill="x", padx=8, pady=4)
+
+        ctk.CTkLabel(p_row_inner, text="Static Photo Mode:", font=("Inter", 10, "bold"), text_color=COLORS["on_surface_variant"]).pack(side="left", padx=(4, 8))
+
+        ctk.CTkButton(
+            p_row_inner, text="🚌 Photo 1 (Volvo AC)", font=("Inter", 10), height=28,
+            fg_color="transparent", text_color="#1d4ed8", hover_color="#e0e7ff",
+            command=lambda: self._test_sample_image("sample_bus_1_TN01AN2345.jpg", "TN 01 AN 2345")
+        ).pack(side="left", padx=4)
+
+        ctk.CTkButton(
+            p_row_inner, text="🚍 Photo 2 (Deluxe)", font=("Inter", 10), height=28,
+            fg_color="transparent", text_color="#b45309", hover_color="#fef3c7",
+            command=lambda: self._test_sample_image("sample_bus_2_TN38N4567.jpg", "TN 38 N 4567")
+        ).pack(side="left", padx=4)
+
+        self.cycle_btn = ctk.CTkButton(
+            p_row_inner, text="🔄 Auto-Cycle Photos", font=("Inter", 10), height=28,
+            fg_color="transparent", text_color="#059669", hover_color="#dcfce7",
             command=self._toggle_auto_stream
         )
-        self.cycle_btn.grid(row=0, column=3, sticky="ew", padx=(6, 0))
+        self.cycle_btn.pack(side="left", padx=4)
+
+    def _start_sample_video_stream(self):
+        """Streams the realistic synthetic terminal CCTV video with real bus docking."""
+        video_file = "sample_bus_terminal_stream.mp4"
+        if not os.path.exists(video_file):
+            # Auto-generate if missing
+            try:
+                import create_sample_bus_video
+                create_sample_bus_video.generate_terminal_video(video_file)
+            except Exception as e:
+                print(f"Error generating sample video: {e}")
+        
+        self._start_video_stream_source(video_file)
+
+    def _load_custom_video(self):
+        """Allows user to select any .mp4 or .avi bus video from disk."""
+        file_path = filedialog.askopenfilename(
+            title="Select Bus Video for YOLOv11 + ANPR Stream",
+            filetypes=[("Video Files", "*.mp4;*.avi;*.mkv;*.mov;*.wmv")]
+        )
+        if file_path:
+            self._start_video_stream_source(file_path)
+
+    def _start_webcam_stream(self):
+        """Streams from physical USB webcam or integrated camera."""
+        self._start_video_stream_source(0)
+
+    def _start_video_stream_source(self, source):
+        # Stop photo auto-stream if active
+        if self.is_auto_streaming:
+            self._toggle_auto_stream()
+
+        self.active_video_source = source
+        started = self.video_engine.start_stream(source)
+        if started:
+            self.is_video_streaming = True
+            source_lbl = os.path.basename(str(source)) if isinstance(source, str) else f"Webcam {source}"
+            self.live_badge_text.configure(text=f"● STREAMING: {source_lbl}")
+            self.live_indicator.configure(fg_color="#16a34a")
+            self.play_video_btn.configure(text="⏸ Pause Stream", command=self._pause_video_stream, fg_color="#b45309")
+            
+            # Start UI video render tick
+            self._video_tick()
+
+    def _pause_video_stream(self):
+        if self.video_engine.is_paused:
+            self.video_engine.resume_stream()
+            self.play_video_btn.configure(text="⏸ Pause Stream")
+            self.live_badge_text.configure(text="● STREAMING ACTIVE")
+            self.live_indicator.configure(fg_color="#16a34a")
+        else:
+            self.video_engine.pause_stream()
+            self.play_video_btn.configure(text="▶ Resume Stream")
+            self.live_badge_text.configure(text="⏸ PAUSED")
+            self.live_indicator.configure(fg_color="#f59e0b")
+
+    def _stop_video_stream(self):
+        self.is_video_streaming = False
+        if hasattr(self, "_video_timer") and self._video_timer:
+            try:
+                self.after_cancel(self._video_timer)
+            except Exception:
+                pass
+            self._video_timer = None
+
+        self.video_engine.stop_stream()
+        self.play_video_btn.configure(
+            text="🎬 Play Real-Time Bus Terminal Video\n(Moving buses, docking in Bay B02 & B03)", 
+            command=self._start_sample_video_stream, 
+            fg_color="#059669"
+        )
+        self.live_badge_text.configure(text="⏹ STREAM STOPPED")
+        self.live_indicator.configure(fg_color="#dc2626")
+        self._refresh_all_data()
+
+    def _video_tick(self):
+        """Smooth 25-30 FPS UI frame display tick."""
+        if not self.is_video_streaming or not self.winfo_exists():
+            return
+
+        frame = self.video_engine.get_latest_frame()
+        if frame is not None:
+            try:
+                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                pil_img = Image.fromarray(rgb_frame)
+                ctk_img = ctk.CTkImage(light_image=pil_img, dark_image=pil_img, size=(680, 380))
+                self.video_label.configure(image=ctk_img, text="")
+                
+                # Update bottom sensor telemetry
+                fps = self.video_engine.current_fps
+                lat = self.video_engine.yolo_latency_ms
+                self.sensor_telemetry_lbl.configure(text=f"Live Feed: {fps:.1f} FPS • YOLOv11: {lat:.1f}ms • ANPR Active")
+            except Exception as e:
+                pass
+
+        # Schedule next tick at ~35ms
+        self._video_timer = self.after(35, self._video_tick)
+
+    def _on_video_detection_event(self, data: dict):
+        """Thread-safe event callback triggered when a bus is identified in the video."""
+        self.after(0, lambda: self._apply_video_detection_ui(data))
+
+    def _apply_video_detection_ui(self, data: dict):
+        """Dynamically synchronizes manifest, detections list, and timeline to the video-detected bus."""
+        plate = data.get("plate_number")
+        if plate:
+            self.selected_bus = plate
+            if plate not in self.current_bus_list:
+                self.current_bus_list.append(plate)
+                self.bus_dropdown.configure(values=self.current_bus_list)
+            self.bus_dropdown.set(plate)
+            
+            # Immediately refresh manifest and timeline with zero lag
+            self._load_manifest()
+            self._load_detections()
+            self._load_timeline()
 
     def _test_sample_image(self, img_filename, bus_reg):
-        """Immediately loads and processes the specified real bus sample image."""
+        """Immediately loads and processes the specified real bus sample photo."""
+        if self.is_video_streaming:
+            self._stop_video_stream()
+            
         self.selected_bus = bus_reg
         self.bus_dropdown.set(bus_reg)
         full_path = os.path.abspath(img_filename)
@@ -229,9 +390,10 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
         ctk.CTkLabel(v_bottom, text="⚡", text_color=COLORS["primary"], font=("Arial", 14)).pack(side="left")
         ctk.CTkLabel(v_bottom, text="PostgreSQL Live Sync", text_color=COLORS["on_surface_variant"], font=FONTS["label_md"]).pack(side="left", padx=4)
         
-        ctk.CTkLabel(v_bottom, text="Camera Sensor: Sony STARVIS 1080p • 30 FPS", text_color=COLORS["on_surface_variant"], font=FONTS["data_mono"]).pack(side="right")
+        self.sensor_telemetry_lbl = ctk.CTkLabel(v_bottom, text="Camera Sensor: Sony STARVIS 1080p • 30 FPS", text_color=COLORS["on_surface_variant"], font=FONTS["data_mono"])
+        self.sensor_telemetry_lbl.pack(side="right")
 
-        # 2. Live Detected Bus Manifest Card (Prominent & User-Friendly)
+        # 2. Live Detected Bus Manifest Card
         self.manifest_card = ctk.CTkFrame(left_col, fg_color=COLORS["surface_container_lowest"], border_color="#0284c7", border_width=2, corner_radius=12)
         self.manifest_card.pack(fill="x", pady=(0, 16))
         
@@ -336,6 +498,9 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
 
     def _load_custom_image(self):
         """Allows user to browse and upload ANY real bus image file on their machine."""
+        if self.is_video_streaming:
+            self._stop_video_stream()
+
         file_path = filedialog.askopenfilename(
             title="Select Real Bus Image for YOLOv11 + ANPR",
             filetypes=[("Image Files", "*.jpg;*.jpeg;*.png;*.bmp")]
@@ -345,9 +510,12 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
 
     def _toggle_auto_stream(self):
         """Starts or stops continuous real-time cycling between both sample buses."""
+        if self.is_video_streaming:
+            self._stop_video_stream()
+
         if self.is_auto_streaming:
             self.is_auto_streaming = False
-            self.cycle_btn.configure(text="▶ Live Auto-Cycle Stream\n(Continuously alternate both buses)", fg_color="#059669")
+            self.cycle_btn.configure(text="🔄 Auto-Cycle Photos", fg_color="transparent")
             self.live_badge_text.configure(text="LIVE CCTV")
             self.live_indicator.configure(fg_color="#dc2626")
             if self._stream_timer:
@@ -355,15 +523,14 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
                 self._stream_timer = None
         else:
             self.is_auto_streaming = True
-            self.cycle_btn.configure(text="⏹ Stop Auto-Cycle\n(Stream Running Live)", fg_color="#dc2626")
-            self.live_badge_text.configure(text="STREAMING ACTIVE")
+            self.cycle_btn.configure(text="⏹ Stop Auto-Cycle", fg_color="#fee2e2")
+            self.live_badge_text.configure(text="PHOTO STREAM ACTIVE")
             self.live_indicator.configure(fg_color="#16a34a")
             self._stream_step()
 
     def _stream_step(self):
         if not self.is_auto_streaming or not self.winfo_exists():
             return
-        # Alternate between the two main sample buses for demo
         samples = [
             ("sample_bus_1_TN01AN2345.jpg", "TN 01 AN 2345"),
             ("sample_bus_2_TN38N4567.jpg", "TN 38 N 4567")
@@ -373,12 +540,12 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
         self.selected_bus = bus_reg
         self.bus_dropdown.set(bus_reg)
         self._trigger_ai_detection(custom_path=os.path.abspath(sample_img))
-        # Schedule next cycle in 5 seconds
         self._stream_timer = self.after(5000, self._stream_step)
 
     def _refresh_all_data(self):
         """Loads video frame, manifest, detections, and timeline."""
-        self._load_video_preview()
+        if not self.is_video_streaming:
+            self._load_video_preview()
         self._load_manifest()
         self._load_detections()
         self._load_timeline()
@@ -400,7 +567,7 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
             except Exception as e:
                 self.video_label.configure(text=f"Image preview notice: {e}", image=None)
         else:
-            self.video_label.configure(text="No active CCTV frame found.\nClick 'Run AI Detection' above.", font=FONTS["body_md"], text_color="#94a3b8")
+            self.video_label.configure(text="No active CCTV frame found.\nClick 'Play Terminal Video' above.", font=FONTS["body_md"], text_color="#94a3b8")
 
     def _load_manifest(self):
         """Queries and renders user-friendly manifest details for the detected bus."""
@@ -588,7 +755,7 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
 
     def _on_detection_complete(self):
         self.is_detecting = False
-        self.detect_btn.configure(text="⚡ Run AI Detection", state="normal")
+        self.detect_btn.configure(text="⚡ Run Photo AI", state="normal")
         
         # Sync selected_bus with latest detected vehicle in DB
         try:
@@ -607,6 +774,13 @@ class LiveMonitoring2View(ctk.CTkScrollableFrame):
         self._refresh_all_data()
 
     def destroy(self):
+        if hasattr(self, "video_engine") and self.video_engine:
+            self.video_engine.stop_stream()
+        if hasattr(self, "_video_timer") and self._video_timer:
+            try:
+                self.after_cancel(self._video_timer)
+            except Exception:
+                pass
         if hasattr(self, "_stream_timer") and self._stream_timer:
             try:
                 self.after_cancel(self._stream_timer)
